@@ -1916,58 +1916,115 @@ Elm.Main.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
-   var cell_size = 20;
-   var cell = $Graphics$Collage.square($Basics.toFloat(cell_size));
+   var Dead = {ctor: "Dead"};
+   var Alive = {ctor: "Alive"};
+   var kCELL_COUNT_H = 30;
+   var kCELL_COUNT_W = 30;
+   var initial_game_state = A2($List.repeat,
+   kCELL_COUNT_H,
+   A2($List.repeat,
+   kCELL_COUNT_W,
+   Dead));
+   var kCELL_SIZE = 20;
+   var cell = $Graphics$Collage.square($Basics.toFloat(kCELL_SIZE));
    var living_cell = $Graphics$Collage.filled($Color.black)(cell);
-   var draw_cells_in_line = F3(function (line_offset,
+   var dead_cell = $Graphics$Collage.outlined($Graphics$Collage.defaultLine)(cell);
+   var create_cell = function (state) {
+      return function () {
+         switch (state.ctor)
+         {case "Alive":
+            return living_cell;
+            case "Dead": return dead_cell;}
+         _U.badCase($moduleName,
+         "between lines 47 and 49");
+      }();
+   };
+   var draw_cells_in_line = F4(function (line_state,
+   line_offset,
    first_cell_offset,
    cells) {
       return function () {
-         var iter = function (cell_count) {
-            return _U.cmp(cell_count,
-            cells) < 1 ? A2($List._op["::"],
-            A2($Graphics$Collage.move,
-            {ctor: "_Tuple2"
-            ,_0: $Basics.toFloat(first_cell_offset + cell_count * cell_size)
-            ,_1: $Basics.toFloat(line_offset)},
-            living_cell),
-            iter(cell_count + 1)) : _L.fromArray([]);
-         };
-         return iter(0);
+         var iter = F2(function (line_state,
+         cell_count) {
+            return function () {
+               switch (line_state.ctor)
+               {case "::": return function () {
+                       var cell_offset = first_cell_offset + cell_count * kCELL_SIZE;
+                       return A2($List._op["::"],
+                       A2($Graphics$Collage.move,
+                       {ctor: "_Tuple2"
+                       ,_0: $Basics.toFloat(cell_offset)
+                       ,_1: $Basics.toFloat(line_offset)},
+                       create_cell(line_state._0)),
+                       A2(iter,
+                       line_state._1,
+                       cell_count + 1));
+                    }();
+                  case "[]":
+                  return _L.fromArray([]);}
+               _U.badCase($moduleName,
+               "between lines 55 and 63");
+            }();
+         });
+         return A2(iter,line_state,0);
       }();
    });
-   var draw_cells = F4(function (w_begin,
+   var draw_cells = F5(function (game_state,
+   w_begin,
    h_begin,
    w_cells,
    h_cells) {
       return function () {
-         var iter = function (line_count) {
-            return _U.cmp(line_count,
-            h_cells) < 1 ? A2($Basics._op["++"],
-            A3(draw_cells_in_line,
-            h_begin + line_count * cell_size,
-            w_begin,
-            w_cells),
-            iter(line_count + 1)) : _L.fromArray([]);
-         };
-         return iter(0);
+         var iter = F2(function (game_state,
+         line_count) {
+            return function () {
+               switch (game_state.ctor)
+               {case "::": return function () {
+                       var line_offset = h_begin + line_count * kCELL_SIZE;
+                       return A2($Basics._op["++"],
+                       A4(draw_cells_in_line,
+                       game_state._0,
+                       line_offset,
+                       w_begin,
+                       w_cells),
+                       A2(iter,
+                       game_state._1,
+                       line_count + 1));
+                    }();
+                  case "[]":
+                  return _L.fromArray([]);}
+               _U.badCase($moduleName,
+               "between lines 36 and 42");
+            }();
+         });
+         return A2(iter,game_state,0);
       }();
    });
-   var dead_cell = $Graphics$Collage.outlined($Graphics$Collage.defaultLine)(cell);
-   var canvas_height = 650;
-   var canvas_width = 650;
+   var kCANVAS_HEIGHT = 650;
+   var kCANVAS_WIDTH = 650;
    var scene = A3($Graphics$Collage.collage,
-   canvas_width,
-   canvas_height,
-   A4(draw_cells,-300,-300,30,30));
+   kCANVAS_WIDTH,
+   kCANVAS_HEIGHT,
+   A5(draw_cells,
+   initial_game_state,
+   -300,
+   -300,
+   kCELL_COUNT_W,
+   kCELL_COUNT_H));
    var main = scene;
    _elm.Main.values = {_op: _op
-                      ,canvas_width: canvas_width
-                      ,canvas_height: canvas_height
-                      ,cell_size: cell_size
+                      ,kCANVAS_WIDTH: kCANVAS_WIDTH
+                      ,kCANVAS_HEIGHT: kCANVAS_HEIGHT
+                      ,kCELL_SIZE: kCELL_SIZE
+                      ,kCELL_COUNT_W: kCELL_COUNT_W
+                      ,kCELL_COUNT_H: kCELL_COUNT_H
                       ,main: main
+                      ,Alive: Alive
+                      ,Dead: Dead
+                      ,initial_game_state: initial_game_state
                       ,scene: scene
                       ,draw_cells: draw_cells
+                      ,create_cell: create_cell
                       ,draw_cells_in_line: draw_cells_in_line
                       ,cell: cell
                       ,living_cell: living_cell
