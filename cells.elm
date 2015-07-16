@@ -19,7 +19,10 @@ kCELL_COUNT_H : Int
 kCELL_COUNT_H = 30
 
 main : Signal Element
-main = scene <~ Signal.foldp revertCell initial_game_state cellClicked
+main = Signal.map3 (\e1 e2 e3 -> combine e2 e3 |> combine e1)
+                   (scene <~ Signal.foldp revertCell initial_game_state cellClicked)
+                   (show <~ Mouse.position)
+                   (show <~ cellClicked)
 
 combine : Element -> Element -> Element
 combine e1 e2 = flow right [e1, e2]
@@ -48,10 +51,11 @@ mousePosToCellCoord : (Int, Int) -> Maybe CellCoord
 mousePosToCellCoord (x_raw, y_raw) =
     let x_calib = 22
         y_calib = 643
-    in let x_coor = (x_raw - x_calib) // kCELL_SIZE
-           y_coor = (y_calib - y_raw) // kCELL_SIZE
+    in let x_coor = (x_raw - x_calib + kCELL_SIZE) // kCELL_SIZE - 1
+           y_coor = (y_calib - y_raw + kCELL_SIZE) // kCELL_SIZE - 1
        in if 
-            | y_coor >= kCELL_COUNT_H || x_coor >= kCELL_COUNT_W -> Nothing
+            | y_coor >= kCELL_COUNT_H || y_coor < 0 ||
+              x_coor >= kCELL_COUNT_W || x_coor < 0 -> Nothing
             | otherwise -> Just (y_coor, x_coor)
 
 

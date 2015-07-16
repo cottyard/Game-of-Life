@@ -2054,18 +2054,18 @@ Elm.Main.make = function (_elm) {
                                       _v4._0),
                                       game);}
                                  _U.badCase($moduleName,
-                                 "between lines 37 and 40");
+                                 "between lines 40 and 43");
                               }();
                             case "Nothing": return game;}
                          _U.badCase($moduleName,
-                         "between lines 36 and 41");
+                         "between lines 39 and 44");
                       }();
                     case "Nothing": return game;}
                  _U.badCase($moduleName,
-                 "between lines 35 and 41");
+                 "between lines 38 and 44");
               }();}
          _U.badCase($moduleName,
-         "between lines 35 and 41");
+         "between lines 38 and 44");
       }();
    });
    var combine = F2(function (e1,
@@ -2089,16 +2089,18 @@ Elm.Main.make = function (_elm) {
             return function () {
                  var y_calib = 643;
                  var x_calib = 22;
-                 var y_coor = (y_calib - _v9._1) / kCELL_SIZE | 0;
-                 var x_coor = (_v9._0 - x_calib) / kCELL_SIZE | 0;
+                 var y_coor = ((y_calib - _v9._1 + kCELL_SIZE) / kCELL_SIZE | 0) - 1;
+                 var x_coor = ((_v9._0 - x_calib + kCELL_SIZE) / kCELL_SIZE | 0) - 1;
                  return _U.cmp(y_coor,
-                 kCELL_COUNT_H) > -1 || _U.cmp(x_coor,
-                 kCELL_COUNT_W) > -1 ? $Maybe.Nothing : $Maybe.Just({ctor: "_Tuple2"
-                                                                    ,_0: y_coor
-                                                                    ,_1: x_coor});
+                 kCELL_COUNT_H) > -1 || (_U.cmp(y_coor,
+                 0) < 0 || (_U.cmp(x_coor,
+                 kCELL_COUNT_W) > -1 || _U.cmp(x_coor,
+                 0) < 0)) ? $Maybe.Nothing : $Maybe.Just({ctor: "_Tuple2"
+                                                         ,_0: y_coor
+                                                         ,_1: x_coor});
               }();}
          _U.badCase($moduleName,
-         "between lines 49 and 55");
+         "between lines 52 and 59");
       }();
    };
    var cellClicked = A3($Signal.filterMap,
@@ -2117,7 +2119,7 @@ Elm.Main.make = function (_elm) {
             return living_cell;
             case "Dead": return dead_cell;}
          _U.badCase($moduleName,
-         "between lines 82 and 84");
+         "between lines 86 and 88");
       }();
    };
    var draw_cells_in_line = F3(function (line_state,
@@ -2143,7 +2145,7 @@ Elm.Main.make = function (_elm) {
                   case "[]":
                   return _L.fromArray([]);}
                _U.badCase($moduleName,
-               "between lines 90 and 98");
+               "between lines 94 and 102");
             }();
          });
          return A2(iter,line_state,0);
@@ -2171,7 +2173,7 @@ Elm.Main.make = function (_elm) {
                   case "[]":
                   return _L.fromArray([]);}
                _U.badCase($moduleName,
-               "between lines 71 and 77");
+               "between lines 75 and 81");
             }();
          });
          return A2(iter,game_state,0);
@@ -2188,11 +2190,23 @@ Elm.Main.make = function (_elm) {
       -300,
       -300));
    };
-   var main = A2($Signal._op["<~"],
+   var main = A4($Signal.map3,
+   F3(function (e1,e2,e3) {
+      return combine(e1)(A2(combine,
+      e2,
+      e3));
+   }),
+   A2($Signal._op["<~"],
    scene,
    A3($Signal.foldp,
    revertCell,
    initial_game_state,
+   cellClicked)),
+   A2($Signal._op["<~"],
+   $Graphics$Element.show,
+   $Mouse.position),
+   A2($Signal._op["<~"],
+   $Graphics$Element.show,
    cellClicked));
    _elm.Main.values = {_op: _op
                       ,kCANVAS_WIDTH: kCANVAS_WIDTH
