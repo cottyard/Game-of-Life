@@ -1,6 +1,6 @@
 import Color
 import Signal exposing ((<~))
-import Graphics.Element exposing (Element, show)
+import Graphics.Element exposing (Element, show, flow, right)
 import Graphics.Collage exposing (Shape, collage, square, filled, Form, defaultLine, outlined, group, move)
 import Mouse
 import Window
@@ -18,28 +18,52 @@ kCELL_COUNT_W = 30
 kCELL_COUNT_H : Int
 kCELL_COUNT_H = 30
 
-main : Element
-main = scene
+main : Signal Element
+main = scene <~ Signal.foldp revertCell initial_game_state cellClicked
+
+combine : Element -> Element -> Element
+combine e1 e2 = flow right [e1, e2]
 
 type CellState = Alive | Dead
-type alias GameState = Array (Array CellState)
+type alias CellCoord = (Int, Int)
 
+type alias GameState = Array (Array CellState)
 type alias ImmutableGameState = List (List CellState)
 
+revertCell : CellCoord -> GameState -> GameState
+revertCell (x, y) game =
+    case get x game of
+        Just line -> case get y line of
+            Just state -> case state of
+                Alive -> set x (set y Dead line) game
+                Dead -> set x (set y Alive line) game
+            Nothing -> game
+        Nothing -> game
+
+cellClicked : Signal CellCoord
+cellClicked = 
+    Signal.filterMap mousePosToCellCoord (0, 0) (Signal.sampleOn Mouse.clicks Mouse.position)
+
+mousePosToCellCoord : (Int, Int) -> Maybe CellCoord
+mousePosToCellCoord (x_raw, y_raw) =
+    let x_calib = 22
+        y_calib = 643
+    in let x_coor = (x_raw - x_calib) // kCELL_SIZE
+           y_coor = (y_calib - y_raw) // kCELL_SIZE
+       in if 
+            | y_coor >= kCELL_COUNT_H || x_coor >= kCELL_COUNT_W -> Nothing
+            | otherwise -> Just (y_coor, x_coor)
+
+
 initial_game_state : GameState
-initial_game_state = 
-    let blank_state = (Array.repeat kCELL_COUNT_H (Array.repeat kCELL_COUNT_W Dead))
-    in case get 3 blank_state of
-        Just line ->
-            set 3 (set 4 Alive line) blank_state
-        Nothing ->
-            blank_state
+initial_game_state = Array.repeat kCELL_COUNT_H (Array.repeat kCELL_COUNT_W Dead)
+
 
 make_immutable : GameState -> ImmutableGameState
 make_immutable game_state = Array.map Array.toList game_state |> Array.toList
 
-scene : Element
-scene = collage kCANVAS_WIDTH kCANVAS_HEIGHT (draw_cells (make_immutable initial_game_state) -300 -300)
+scene : GameState -> Element
+scene game_state = collage kCANVAS_WIDTH kCANVAS_HEIGHT (draw_cells (make_immutable game_state) -300 -300)
 
 draw_cells : ImmutableGameState -> Int -> Int -> List Form
 draw_cells game_state w_begin h_begin =
