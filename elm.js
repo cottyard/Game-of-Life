@@ -2009,28 +2009,42 @@ Elm.Main.make = function (_elm) {
    $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm),
    $Update = Elm.Update.make(_elm),
    $View = Elm.View.make(_elm);
-   var main = A4($Signal.map3,
-   F3(function (e1,e2,e3) {
-      return A2($Graphics$Element.flow,
-      $Graphics$Element.right,
-      _L.fromArray([e1,e2,e3]));
-   }),
+   var timeUpReceived = A2($Signal._op["<~"],
+   $Graphics$Element.show,
    A2($Signal._op["<~"],
+   $Time.inSeconds,
+   $Update.timeUp));
+   var mainAreaClicked = A2($Signal._op["<~"],
+   $Graphics$Element.show,
+   $Update.cellClicked);
+   var mousePosUpdated = A2($Signal._op["<~"],
+   $Graphics$Element.show,
+   $Mouse.position);
+   var mainAreaUpdated = A2($Signal._op["<~"],
    $View.scene,
    A3($Signal.foldp,
-   $Model.revertCell,
+   $Update.updateGameState,
    $Model.initial_game_state,
-   $Update.cellClicked)),
-   A2($Signal._op["<~"],
-   $Graphics$Element.show,
-   $Mouse.position),
-   A2($Signal._op["<~"],
-   $Graphics$Element.show,
-   $Update.cellClicked));
+   $Update.updates));
+   var main = A5($Signal.map4,
+   F4(function (e1,e2,e3,e4) {
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.right,
+      _L.fromArray([e1,e2,e3,e4]));
+   }),
+   mainAreaUpdated,
+   mousePosUpdated,
+   mainAreaClicked,
+   timeUpReceived);
    _elm.Main.values = {_op: _op
-                      ,main: main};
+                      ,main: main
+                      ,mainAreaUpdated: mainAreaUpdated
+                      ,mousePosUpdated: mousePosUpdated
+                      ,mainAreaClicked: mainAreaClicked
+                      ,timeUpReceived: timeUpReceived};
    return _elm.Main.values;
 };
 Elm.Maybe = Elm.Maybe || {};
@@ -2128,84 +2142,94 @@ Elm.Model.make = function (_elm) {
       $Array.toList,
       game_state));
    };
+   var CellCoord = function (a) {
+      return {ctor: "CellCoord"
+             ,_0: a};
+   };
    var Dead = {ctor: "Dead"};
    var getCellState = F2(function (_v0,
    game) {
       return function () {
          switch (_v0.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var _v4 = A2($Array.get,
-                 _v0._0,
-                 game);
-                 switch (_v4.ctor)
-                 {case "Just":
-                    return function () {
-                         var _v6 = A2($Array.get,
-                         _v0._1,
-                         _v4._0);
-                         switch (_v6.ctor)
-                         {case "Just": return _v6._0;}
-                         _U.badCase($moduleName,
-                         "between lines 28 and 30");
-                      }();
-                    case "Nothing": return Dead;}
-                 _U.badCase($moduleName,
-                 "between lines 27 and 30");
-              }();}
+         {case "CellCoord":
+            switch (_v0._0.ctor)
+              {case "_Tuple2":
+                 return function () {
+                      var _v5 = A2($Array.get,
+                      _v0._0._0,
+                      game);
+                      switch (_v5.ctor)
+                      {case "Just":
+                         return function () {
+                              var _v7 = A2($Array.get,
+                              _v0._0._1,
+                              _v5._0);
+                              switch (_v7.ctor)
+                              {case "Just": return _v7._0;}
+                              _U.badCase($moduleName,
+                              "between lines 26 and 28");
+                           }();
+                         case "Nothing": return Dead;}
+                      _U.badCase($moduleName,
+                      "between lines 25 and 28");
+                   }();}
+              break;}
          _U.badCase($moduleName,
-         "between lines 27 and 30");
+         "between lines 25 and 28");
       }();
    });
    var Alive = {ctor: "Alive"};
-   var revertCell = F2(function (_v8,
+   var revertCell = F2(function (_v9,
    game) {
       return function () {
-         switch (_v8.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var _v12 = A2($Array.get,
-                 _v8._0,
-                 game);
-                 switch (_v12.ctor)
-                 {case "Just":
-                    return function () {
-                         var _v14 = A2($Array.get,
-                         _v8._1,
-                         _v12._0);
-                         switch (_v14.ctor)
-                         {case "Just":
-                            return function () {
-                                 switch (_v14._0.ctor)
-                                 {case "Alive":
-                                    return A3($Array.set,
-                                      _v8._0,
-                                      A3($Array.set,
-                                      _v8._1,
-                                      Dead,
-                                      _v12._0),
-                                      game);
-                                    case "Dead":
-                                    return A3($Array.set,
-                                      _v8._0,
-                                      A3($Array.set,
-                                      _v8._1,
-                                      Alive,
-                                      _v12._0),
-                                      game);}
-                                 _U.badCase($moduleName,
-                                 "between lines 36 and 39");
-                              }();
-                            case "Nothing": return game;}
-                         _U.badCase($moduleName,
-                         "between lines 35 and 40");
-                      }();
-                    case "Nothing": return game;}
-                 _U.badCase($moduleName,
-                 "between lines 34 and 40");
-              }();}
+         switch (_v9.ctor)
+         {case "CellCoord":
+            switch (_v9._0.ctor)
+              {case "_Tuple2":
+                 return function () {
+                      var _v14 = A2($Array.get,
+                      _v9._0._0,
+                      game);
+                      switch (_v14.ctor)
+                      {case "Just":
+                         return function () {
+                              var _v16 = A2($Array.get,
+                              _v9._0._1,
+                              _v14._0);
+                              switch (_v16.ctor)
+                              {case "Just":
+                                 return function () {
+                                      switch (_v16._0.ctor)
+                                      {case "Alive":
+                                         return A3($Array.set,
+                                           _v9._0._0,
+                                           A3($Array.set,
+                                           _v9._0._1,
+                                           Dead,
+                                           _v14._0),
+                                           game);
+                                         case "Dead":
+                                         return A3($Array.set,
+                                           _v9._0._0,
+                                           A3($Array.set,
+                                           _v9._0._1,
+                                           Alive,
+                                           _v14._0),
+                                           game);}
+                                      _U.badCase($moduleName,
+                                      "between lines 34 and 37");
+                                   }();
+                                 case "Nothing": return game;}
+                              _U.badCase($moduleName,
+                              "between lines 33 and 38");
+                           }();
+                         case "Nothing": return game;}
+                      _U.badCase($moduleName,
+                      "between lines 32 and 38");
+                   }();}
+              break;}
          _U.badCase($moduleName,
-         "between lines 34 and 40");
+         "between lines 32 and 38");
       }();
    });
    var kCELL_COUNT_H = 30;
@@ -2220,6 +2244,7 @@ Elm.Model.make = function (_elm) {
                        ,kCELL_COUNT_H: kCELL_COUNT_H
                        ,Alive: Alive
                        ,Dead: Dead
+                       ,CellCoord: CellCoord
                        ,initial_game_state: initial_game_state
                        ,make_immutable: make_immutable
                        ,getCellState: getCellState
@@ -7082,6 +7107,117 @@ Elm.Native.Text.make = function(localRuntime) {
 	};
 };
 
+Elm.Native.Time = {};
+Elm.Native.Time.make = function(localRuntime)
+{
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Time = localRuntime.Native.Time || {};
+	if (localRuntime.Native.Time.values)
+	{
+		return localRuntime.Native.Time.values;
+	}
+
+	var NS = Elm.Native.Signal.make(localRuntime);
+	var Maybe = Elm.Maybe.make(localRuntime);
+
+
+	// FRAMES PER SECOND
+
+	function fpsWhen(desiredFPS, isOn)
+	{
+		var msPerFrame = 1000 / desiredFPS;
+		var ticker = NS.input('fps-' + desiredFPS, null);
+
+		function notifyTicker()
+		{
+			localRuntime.notify(ticker.id, null);
+		}
+
+		function firstArg(x, y)
+		{
+			return x;
+		}
+
+		// input fires either when isOn changes, or when ticker fires.
+		// Its value is a tuple with the current timestamp, and the state of isOn
+		var input = NS.timestamp(A3(NS.map2, F2(firstArg), NS.dropRepeats(isOn), ticker));
+
+		var initialState = {
+			isOn: false,
+			time: localRuntime.timer.programStart,
+			delta: 0
+		};
+
+		var timeoutId;
+
+		function update(input,state)
+		{
+			var currentTime = input._0;
+			var isOn = input._1;
+			var wasOn = state.isOn;
+			var previousTime = state.time;
+
+			if (isOn)
+			{
+				timeoutId = localRuntime.setTimeout(notifyTicker, msPerFrame);
+			}
+			else if (wasOn)
+			{
+				clearTimeout(timeoutId);
+			}
+
+			return {
+				isOn: isOn,
+				time: currentTime,
+				delta: (isOn && !wasOn) ? 0 : currentTime - previousTime
+			};
+		}
+
+		return A2(
+			NS.map,
+			function(state) { return state.delta; },
+			A3(NS.foldp, F2(update), update(input.value,initialState), input)
+		);
+	}
+
+
+	// EVERY
+
+	function every(t)
+	{
+		var ticker = NS.input('every-' + t, null);
+		function tellTime()
+		{
+			localRuntime.notify(ticker.id, null);
+		}
+		var clock = A2( NS.map, fst, NS.timestamp(ticker) );
+		setInterval(tellTime, t);
+		return clock;
+	}
+
+
+	function fst(pair)
+	{
+		return pair._0;
+	}
+
+
+	function read(s)
+	{
+		var t = Date.parse(s);
+		return isNaN(t) ? Maybe.Nothing : Maybe.Just(t);
+	}
+
+	return localRuntime.Native.Time.values = {
+		fpsWhen: F2(fpsWhen),
+		every: every,
+		toDate: function(t) { return new window.Date(t); },
+		read: read
+	};
+
+};
+
 Elm.Native.Transform2D = {};
 Elm.Native.Transform2D.make = function(localRuntime) {
 
@@ -8257,6 +8393,85 @@ Elm.Text.make = function (_elm) {
                       ,Through: Through};
    return _elm.Text.values;
 };
+Elm.Time = Elm.Time || {};
+Elm.Time.make = function (_elm) {
+   "use strict";
+   _elm.Time = _elm.Time || {};
+   if (_elm.Time.values)
+   return _elm.Time.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Time",
+   $Basics = Elm.Basics.make(_elm),
+   $Native$Signal = Elm.Native.Signal.make(_elm),
+   $Native$Time = Elm.Native.Time.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var delay = $Native$Signal.delay;
+   var since = F2(function (time,
+   signal) {
+      return function () {
+         var stop = A2($Signal.map,
+         $Basics.always(-1),
+         A2(delay,time,signal));
+         var start = A2($Signal.map,
+         $Basics.always(1),
+         signal);
+         var delaydiff = A3($Signal.foldp,
+         F2(function (x,y) {
+            return x + y;
+         }),
+         0,
+         A2($Signal.merge,start,stop));
+         return A2($Signal.map,
+         F2(function (x,y) {
+            return !_U.eq(x,y);
+         })(0),
+         delaydiff);
+      }();
+   });
+   var timestamp = $Native$Signal.timestamp;
+   var every = $Native$Time.every;
+   var fpsWhen = $Native$Time.fpsWhen;
+   var fps = function (targetFrames) {
+      return A2(fpsWhen,
+      targetFrames,
+      $Signal.constant(true));
+   };
+   var inMilliseconds = function (t) {
+      return t;
+   };
+   var millisecond = 1;
+   var second = 1000 * millisecond;
+   var minute = 60 * second;
+   var hour = 60 * minute;
+   var inHours = function (t) {
+      return t / hour;
+   };
+   var inMinutes = function (t) {
+      return t / minute;
+   };
+   var inSeconds = function (t) {
+      return t / second;
+   };
+   _elm.Time.values = {_op: _op
+                      ,millisecond: millisecond
+                      ,second: second
+                      ,minute: minute
+                      ,hour: hour
+                      ,inMilliseconds: inMilliseconds
+                      ,inSeconds: inSeconds
+                      ,inMinutes: inMinutes
+                      ,inHours: inHours
+                      ,fps: fps
+                      ,fpsWhen: fpsWhen
+                      ,every: every
+                      ,timestamp: timestamp
+                      ,delay: delay
+                      ,since: since};
+   return _elm.Time.values;
+};
 Elm.Transform2D = Elm.Transform2D || {};
 Elm.Transform2D.make = function (_elm) {
    "use strict";
@@ -8340,15 +8555,61 @@ Elm.Update.make = function (_elm) {
    $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm),
    $View = Elm.View.make(_elm);
+   var timeUp = $Time.every($Time.second);
    var cellClicked = A3($Signal.filterMap,
    $View.mousePosToCellCoord,
-   {ctor: "_Tuple2",_0: 0,_1: 0},
+   $Model.CellCoord({ctor: "_Tuple2"
+                    ,_0: 0
+                    ,_1: 0}),
    A2($Signal.sampleOn,
    $Mouse.clicks,
    $Mouse.position));
+   var updateGameState = F2(function (update,
+   game_state) {
+      return function () {
+         switch (update.ctor)
+         {case "CellClick":
+            switch (update._0.ctor)
+              {case "CellCoord":
+                 switch (update._0._0.ctor)
+                   {case "_Tuple2":
+                      return A2($Model.revertCell,
+                        $Model.CellCoord({ctor: "_Tuple2"
+                                         ,_0: update._0._0._0
+                                         ,_1: update._0._0._1}),
+                        game_state);}
+                   break;}
+              break;
+            case "TimeUp":
+            return game_state;}
+         _U.badCase($moduleName,
+         "between lines 20 and 22");
+      }();
+   });
+   var TimeUp = function (a) {
+      return {ctor: "TimeUp"
+             ,_0: a};
+   };
+   var CellClick = function (a) {
+      return {ctor: "CellClick"
+             ,_0: a};
+   };
+   var updates = A2($Signal.merge,
+   A2($Signal._op["<~"],
+   CellClick,
+   cellClicked),
+   A2($Signal._op["<~"],
+   TimeUp,
+   timeUp));
    _elm.Update.values = {_op: _op
-                        ,cellClicked: cellClicked};
+                        ,CellClick: CellClick
+                        ,TimeUp: TimeUp
+                        ,updates: updates
+                        ,updateGameState: updateGameState
+                        ,cellClicked: cellClicked
+                        ,timeUp: timeUp};
    return _elm.Update.values;
 };
 Elm.View = Elm.View || {};
@@ -8385,9 +8646,9 @@ Elm.View.make = function (_elm) {
                  $Model.kCELL_COUNT_H) > -1 || (_U.cmp(y_coor,
                  0) < 0 || (_U.cmp(x_coor,
                  $Model.kCELL_COUNT_W) > -1 || _U.cmp(x_coor,
-                 0) < 0)) ? $Maybe.Nothing : $Maybe.Just({ctor: "_Tuple2"
-                                                         ,_0: y_coor
-                                                         ,_1: x_coor});
+                 0) < 0)) ? $Maybe.Nothing : $Maybe.Just($Model.CellCoord({ctor: "_Tuple2"
+                                                                          ,_0: y_coor
+                                                                          ,_1: x_coor}));
               }();}
          _U.badCase($moduleName,
          "between lines 52 and 59");

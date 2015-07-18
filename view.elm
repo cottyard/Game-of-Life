@@ -56,7 +56,7 @@ mousePosToCellCoord (x_raw, y_raw) =
        in if 
             | y_coor >= kCELL_COUNT_H || y_coor < 0 ||
               x_coor >= kCELL_COUNT_W || x_coor < 0 -> Nothing
-            | otherwise -> Just (y_coor, x_coor)
+            | otherwise -> Just (Model.CellCoord (y_coor, x_coor))
 
 cell : Shape
 cell = square (toFloat kCELL_SIZE)
