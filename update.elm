@@ -1,7 +1,8 @@
 module Update where
 
 import Mouse
-import Time exposing (Time, every, second)
+import Keyboard exposing (space)
+import Time exposing (Time, fpsWhen)
 import Signal exposing ((<~))
 
 import View exposing (mousePosToCellCoord)
@@ -26,4 +27,12 @@ cellClicked =
   Signal.filterMap mousePosToCellCoord (Model.CellCoord (0, 0)) (Signal.sampleOn Mouse.clicks Mouse.position)
 
 timeUp : Signal Time
-timeUp = every second
+timeUp = fpsWhen 1 timerState
+
+changeTimerState : Bool -> Bool -> Bool
+changeTimerState space_pressed timer_state =
+  if space_pressed then not timer_state else timer_state
+
+timerState : Signal Bool
+timerState =
+  Signal.foldp changeTimerState False Keyboard.space

@@ -29,4 +29,5 @@ mainAreaClicked =
 
 timeUpReceived : Signal Element
 timeUpReceived =
-  show <~ (Time.inSeconds <~ timeUp)
+  show <~ (Time.inSeconds <~ timeUp)  
+
