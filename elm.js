@@ -3229,6 +3229,12 @@ Elm.Main.make = function (_elm) {
    $Time = Elm.Time.make(_elm),
    $Update = Elm.Update.make(_elm),
    $View = Elm.View.make(_elm);
+   var showNeighbourCount = A2($Signal._op["<~"],
+   $Graphics$Element.show,
+   A3($Signal.map2,
+   $Model.getNeighbourCount,
+   $Update.cellClicked,
+   $Update.gameStateUpdated));
    var timeUpReceived = A2($Signal._op["<~"],
    $Graphics$Element.show,
    A2($Signal._op["<~"],
@@ -3242,10 +3248,7 @@ Elm.Main.make = function (_elm) {
    $Mouse.position);
    var mainAreaUpdated = A2($Signal._op["<~"],
    $View.scene,
-   A3($Signal.foldp,
-   $Update.updateGameState,
-   $Model.initial_game_state,
-   $Update.updates));
+   $Update.gameStateUpdated);
    var main = A5($Signal.map4,
    F4(function (e1,e2,e3,e4) {
       return A2($Graphics$Element.flow,
@@ -3255,13 +3258,14 @@ Elm.Main.make = function (_elm) {
    mainAreaUpdated,
    mousePosUpdated,
    mainAreaClicked,
-   timeUpReceived);
+   showNeighbourCount);
    _elm.Main.values = {_op: _op
                       ,main: main
                       ,mainAreaUpdated: mainAreaUpdated
                       ,mousePosUpdated: mousePosUpdated
                       ,mainAreaClicked: mainAreaClicked
-                      ,timeUpReceived: timeUpReceived};
+                      ,timeUpReceived: timeUpReceived
+                      ,showNeighbourCount: showNeighbourCount};
    return _elm.Main.values;
 };
 Elm.Maybe = Elm.Maybe || {};
@@ -3354,6 +3358,25 @@ Elm.Model.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
+   var combinations = F2(function (list_1,
+   list_2) {
+      return function () {
+         switch (list_1.ctor)
+         {case "::":
+            return A2($Basics._op["++"],
+              A2($List.map,
+              F2(function (v0,v1) {
+                 return {ctor: "_Tuple2"
+                        ,_0: v0
+                        ,_1: v1};
+              })(list_1._0),
+              list_2),
+              A2(combinations,
+              list_1._1,
+              list_2));}
+         return _L.fromArray([]);
+      }();
+   });
    var make_immutable = function (game_state) {
       return $Array.toList(A2($Array.map,
       $Array.toList,
@@ -3364,25 +3387,25 @@ Elm.Model.make = function (_elm) {
              ,_0: a};
    };
    var Dead = {ctor: "Dead"};
-   var getCellState = F2(function (_v0,
+   var getCellState = F2(function (_v3,
    game) {
       return function () {
-         switch (_v0.ctor)
+         switch (_v3.ctor)
          {case "CellCoord":
-            switch (_v0._0.ctor)
+            switch (_v3._0.ctor)
               {case "_Tuple2":
                  return function () {
-                      var _v5 = A2($Array.get,
-                      _v0._0._0,
+                      var _v8 = A2($Array.get,
+                      _v3._0._0,
                       game);
-                      switch (_v5.ctor)
+                      switch (_v8.ctor)
                       {case "Just":
                          return function () {
-                              var _v7 = A2($Array.get,
-                              _v0._0._1,
-                              _v5._0);
-                              switch (_v7.ctor)
-                              {case "Just": return _v7._0;}
+                              var _v10 = A2($Array.get,
+                              _v3._0._1,
+                              _v8._0);
+                              switch (_v10.ctor)
+                              {case "Just": return _v10._0;}
                               _U.badCase($moduleName,
                               "between lines 26 and 28");
                            }();
@@ -3396,57 +3419,57 @@ Elm.Model.make = function (_elm) {
       }();
    });
    var Alive = {ctor: "Alive"};
-   var revertCell = F2(function (_v9,
+   var revertCell = F2(function (_v12,
    game) {
       return function () {
-         switch (_v9.ctor)
+         switch (_v12.ctor)
          {case "CellCoord":
-            switch (_v9._0.ctor)
+            switch (_v12._0.ctor)
               {case "_Tuple2":
                  return function () {
-                      var _v14 = A2($Array.get,
-                      _v9._0._0,
+                      var _v17 = A2($Array.get,
+                      _v12._0._0,
                       game);
-                      switch (_v14.ctor)
+                      switch (_v17.ctor)
                       {case "Just":
                          return function () {
-                              var _v16 = A2($Array.get,
-                              _v9._0._1,
-                              _v14._0);
-                              switch (_v16.ctor)
+                              var _v19 = A2($Array.get,
+                              _v12._0._1,
+                              _v17._0);
+                              switch (_v19.ctor)
                               {case "Just":
                                  return function () {
-                                      switch (_v16._0.ctor)
+                                      switch (_v19._0.ctor)
                                       {case "Alive":
                                          return A3($Array.set,
-                                           _v9._0._0,
+                                           _v12._0._0,
                                            A3($Array.set,
-                                           _v9._0._1,
+                                           _v12._0._1,
                                            Dead,
-                                           _v14._0),
+                                           _v17._0),
                                            game);
                                          case "Dead":
                                          return A3($Array.set,
-                                           _v9._0._0,
+                                           _v12._0._0,
                                            A3($Array.set,
-                                           _v9._0._1,
+                                           _v12._0._1,
                                            Alive,
-                                           _v14._0),
+                                           _v17._0),
                                            game);}
                                       _U.badCase($moduleName,
-                                      "between lines 34 and 37");
+                                      "between lines 56 and 59");
                                    }();
                                  case "Nothing": return game;}
                               _U.badCase($moduleName,
-                              "between lines 33 and 38");
+                              "between lines 55 and 60");
                            }();
                          case "Nothing": return game;}
                       _U.badCase($moduleName,
-                      "between lines 32 and 38");
+                      "between lines 54 and 60");
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 32 and 38");
+         "between lines 54 and 60");
       }();
    });
    var kCELL_COUNT_H = 30;
@@ -3456,6 +3479,80 @@ Elm.Model.make = function (_elm) {
    A2($Array.repeat,
    kCELL_COUNT_W,
    Dead));
+   var getNeighbourCount = F2(function (_v22,
+   game) {
+      return function () {
+         switch (_v22.ctor)
+         {case "CellCoord":
+            switch (_v22._0.ctor)
+              {case "_Tuple2":
+                 return function () {
+                      var countAlive = F2(function (cell_state,
+                      alive_count) {
+                         return function () {
+                            switch (cell_state.ctor)
+                            {case "Alive":
+                               return alive_count + 1;
+                               case "Dead":
+                               return alive_count;}
+                            _U.badCase($moduleName,
+                            "between lines 38 and 41");
+                         }();
+                      });
+                      var makeToroidal = function (_v28) {
+                         return function () {
+                            switch (_v28.ctor)
+                            {case "_Tuple2":
+                               return {ctor: "_Tuple2"
+                                      ,_0: A2($Basics._op["%"],
+                                      _v28._0,
+                                      kCELL_COUNT_W)
+                                      ,_1: A2($Basics._op["%"],
+                                      _v28._1,
+                                      kCELL_COUNT_H)};}
+                            _U.badCase($moduleName,
+                            "on line 33, column 30 to 66");
+                         }();
+                      };
+                      var addCoord = function (_v32) {
+                         return function () {
+                            switch (_v32.ctor)
+                            {case "_Tuple2":
+                               return {ctor: "_Tuple2"
+                                      ,_0: _v22._0._0 + _v32._0
+                                      ,_1: _v22._0._1 + _v32._1};}
+                            _U.badCase($moduleName,
+                            "on line 32, column 28 to 42");
+                         }();
+                      };
+                      var neighbour_cell_states = A2($List.map,
+                      function ($) {
+                         return A2($Basics.flip,
+                         getCellState,
+                         game)(CellCoord(makeToroidal(addCoord($))));
+                      },
+                      _L.fromArray([{ctor: "_Tuple2"
+                                    ,_0: -1
+                                    ,_1: -1}
+                                   ,{ctor: "_Tuple2",_0: -1,_1: 0}
+                                   ,{ctor: "_Tuple2",_0: -1,_1: 1}
+                                   ,{ctor: "_Tuple2",_0: 0,_1: -1}
+                                   ,{ctor: "_Tuple2",_0: 0,_1: 1}
+                                   ,{ctor: "_Tuple2",_0: 1,_1: -1}
+                                   ,{ctor: "_Tuple2",_0: 1,_1: 0}
+                                   ,{ctor: "_Tuple2"
+                                    ,_0: 1
+                                    ,_1: 1}]));
+                      return A3($List.foldl,
+                      countAlive,
+                      0,
+                      neighbour_cell_states);
+                   }();}
+              break;}
+         _U.badCase($moduleName,
+         "between lines 32 and 41");
+      }();
+   });
    _elm.Model.values = {_op: _op
                        ,kCELL_COUNT_W: kCELL_COUNT_W
                        ,kCELL_COUNT_H: kCELL_COUNT_H
@@ -3465,6 +3562,8 @@ Elm.Model.make = function (_elm) {
                        ,initial_game_state: initial_game_state
                        ,make_immutable: make_immutable
                        ,getCellState: getCellState
+                       ,getNeighbourCount: getNeighbourCount
+                       ,combinations: combinations
                        ,revertCell: revertCell};
    return _elm.Model.values;
 };
@@ -10433,7 +10532,7 @@ Elm.Update.make = function (_elm) {
             case "TimeUp":
             return game_state;}
          _U.badCase($moduleName,
-         "between lines 21 and 23");
+         "between lines 25 and 27");
       }();
    });
    var TimeUp = function (a) {
@@ -10451,10 +10550,15 @@ Elm.Update.make = function (_elm) {
    A2($Signal._op["<~"],
    TimeUp,
    timeUp));
+   var gameStateUpdated = A3($Signal.foldp,
+   updateGameState,
+   $Model.initial_game_state,
+   updates);
    _elm.Update.values = {_op: _op
                         ,CellClick: CellClick
                         ,TimeUp: TimeUp
                         ,updates: updates
+                        ,gameStateUpdated: gameStateUpdated
                         ,updateGameState: updateGameState
                         ,cellClicked: cellClicked
                         ,timeUp: timeUp
@@ -10488,7 +10592,7 @@ Elm.View.make = function (_elm) {
          switch (_v0.ctor)
          {case "_Tuple2":
             return function () {
-                 var y_calib = 643;
+                 var y_calib = 645;
                  var x_calib = 22;
                  var y_coor = ((y_calib - _v0._1 + kCELL_SIZE) / kCELL_SIZE | 0) - 1;
                  var x_coor = ((_v0._0 - x_calib + kCELL_SIZE) / kCELL_SIZE | 0) - 1;
@@ -10501,7 +10605,7 @@ Elm.View.make = function (_elm) {
                                                                           ,_1: x_coor}));
               }();}
          _U.badCase($moduleName,
-         "between lines 52 and 59");
+         "between lines 53 and 60");
       }();
    };
    var cell = $Graphics$Collage.square($Basics.toFloat(kCELL_SIZE));
@@ -10514,7 +10618,7 @@ Elm.View.make = function (_elm) {
             return living_cell;
             case "Dead": return dead_cell;}
          _U.badCase($moduleName,
-         "between lines 33 and 35");
+         "between lines 34 and 36");
       }();
    };
    var draw_cells_in_line = F3(function (line_state,
@@ -10540,7 +10644,7 @@ Elm.View.make = function (_elm) {
                   case "[]":
                   return _L.fromArray([]);}
                _U.badCase($moduleName,
-               "between lines 40 and 48");
+               "between lines 41 and 49");
             }();
          });
          return A2(iter,line_state,0);
@@ -10568,7 +10672,7 @@ Elm.View.make = function (_elm) {
                   case "[]":
                   return _L.fromArray([]);}
                _U.badCase($moduleName,
-               "between lines 23 and 29");
+               "between lines 24 and 30");
             }();
          });
          return A2(iter,game_state,0);

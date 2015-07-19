@@ -16,6 +16,10 @@ updates =
     (CellClick <~ cellClicked)
     (TimeUp <~ timeUp)
 
+gameStateUpdated : Signal GameState
+gameStateUpdated =
+  Signal.foldp updateGameState Model.initial_game_state updates
+
 updateGameState : Update -> GameState -> GameState
 updateGameState update game_state =
   case update of

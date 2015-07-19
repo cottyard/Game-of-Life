@@ -3,7 +3,7 @@ import Signal exposing ((<~))
 import Graphics.Element exposing (Element, show, flow, right)
 import Time
 
-import Update exposing (cellClicked, updateGameState, updates, timeUp)
+import Update exposing (cellClicked, gameStateUpdated, timeUp)
 import Model exposing (initial_game_state)
 import View exposing (scene)
 
@@ -13,11 +13,11 @@ main =
               mainAreaUpdated
               mousePosUpdated
               mainAreaClicked
-              timeUpReceived
+              showNeighbourCount
 
 mainAreaUpdated : Signal Element
 mainAreaUpdated =
-  scene <~ Signal.foldp updateGameState initial_game_state updates
+  scene <~ gameStateUpdated
 
 mousePosUpdated : Signal Element
 mousePosUpdated =
@@ -31,3 +31,6 @@ timeUpReceived : Signal Element
 timeUpReceived =
   show <~ (Time.inSeconds <~ timeUp)  
 
+showNeighbourCount : Signal Element
+showNeighbourCount =
+  show <~ (Signal.map2 Model.getNeighbourCount cellClicked gameStateUpdated)

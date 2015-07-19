@@ -15,7 +15,8 @@ kCELL_SIZE : Int
 kCELL_SIZE = 20
 
 scene : GameState -> Element
-scene game_state = collage kCANVAS_WIDTH kCANVAS_HEIGHT (draw_cells (Model.make_immutable game_state) -300 -300)
+scene game_state =
+  collage kCANVAS_WIDTH kCANVAS_HEIGHT (draw_cells (Model.make_immutable game_state) -300 -300)
 
 draw_cells : ImmutableGameState -> Int -> Int -> List Form
 draw_cells game_state w_begin h_begin =
@@ -50,7 +51,7 @@ draw_cells_in_line line_state line_offset first_cell_offset =
 mousePosToCellCoord : (Int, Int) -> Maybe CellCoord
 mousePosToCellCoord (x_raw, y_raw) =
     let x_calib = 22
-        y_calib = 643
+        y_calib = 645
     in let x_coor = (x_raw - x_calib + kCELL_SIZE) // kCELL_SIZE - 1
            y_coor = (y_calib - y_raw + kCELL_SIZE) // kCELL_SIZE - 1
        in if 
