@@ -40,8 +40,30 @@ getNeighbourCount (CellCoord (x, y)) game =
           Dead -> alive_count
   in List.foldl countAlive 0 neighbour_cell_states
 
---evolveStep : GameState -> GameState
---evolveStep game =
+
+evolveStep : GameState -> GameState
+evolveStep game =
+  mapGameState evolveCell game
+
+mapGameState : (CellCoord -> GameState -> CellState) -> GameState -> GameState
+mapGameState func game =
+  let 
+    perCell x y cell_state = func (CellCoord (x, y)) game
+    perCells x cells = Array.indexedMap (perCell x) cells
+  in
+    Array.indexedMap perCells game
+
+evolveCell : CellCoord -> GameState -> CellState
+evolveCell cell_coord game =
+  let n = getNeighbourCount cell_coord game
+  in case getCellState cell_coord game of
+    Alive -> if
+      | n < 2 -> Dead
+      | n > 3 -> Dead
+      | otherwise -> Alive
+    Dead -> if
+      | n == 3 -> Alive
+      | otherwise -> Dead
 
 combinations : List a -> List a -> List (a, a)
 combinations list_1 list_2 =
@@ -51,10 +73,10 @@ combinations list_1 list_2 =
 
 revertCell : CellCoord -> GameState -> GameState
 revertCell (CellCoord (x, y)) game =
-    case get x game of
-        Just line -> case get y line of
-            Just state -> case state of
-                Alive -> set x (set y Dead line) game
-                Dead -> set x (set y Alive line) game
-            Nothing -> game
-        Nothing -> game
+  case get x game of
+    Just line -> case get y line of
+      Just state -> case state of
+        Alive -> set x (set y Dead line) game
+        Dead -> set x (set y Alive line) game
+      Nothing -> game
+    Nothing -> game

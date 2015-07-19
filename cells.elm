@@ -13,7 +13,7 @@ main =
               mainAreaUpdated
               mousePosUpdated
               mainAreaClicked
-              showNeighbourCount
+              timerState
 
 mainAreaUpdated : Signal Element
 mainAreaUpdated =
@@ -27,10 +27,6 @@ mainAreaClicked : Signal Element
 mainAreaClicked = 
   show <~ cellClicked
 
-timeUpReceived : Signal Element
-timeUpReceived =
-  show <~ (Time.inSeconds <~ timeUp)  
-
-showNeighbourCount : Signal Element
-showNeighbourCount =
-  show <~ (Signal.map2 Model.getNeighbourCount cellClicked gameStateUpdated)
+timerState : Signal Element
+timerState =
+  show <~ Update.timerStateChanged

@@ -3222,24 +3222,14 @@ Elm.Main.make = function (_elm) {
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Model = Elm.Model.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm),
    $Update = Elm.Update.make(_elm),
    $View = Elm.View.make(_elm);
-   var showNeighbourCount = A2($Signal._op["<~"],
+   var timerState = A2($Signal._op["<~"],
    $Graphics$Element.show,
-   A3($Signal.map2,
-   $Model.getNeighbourCount,
-   $Update.cellClicked,
-   $Update.gameStateUpdated));
-   var timeUpReceived = A2($Signal._op["<~"],
-   $Graphics$Element.show,
-   A2($Signal._op["<~"],
-   $Time.inSeconds,
-   $Update.timeUp));
+   $Update.timerStateChanged);
    var mainAreaClicked = A2($Signal._op["<~"],
    $Graphics$Element.show,
    $Update.cellClicked);
@@ -3258,14 +3248,13 @@ Elm.Main.make = function (_elm) {
    mainAreaUpdated,
    mousePosUpdated,
    mainAreaClicked,
-   showNeighbourCount);
+   timerState);
    _elm.Main.values = {_op: _op
                       ,main: main
                       ,mainAreaUpdated: mainAreaUpdated
                       ,mousePosUpdated: mousePosUpdated
                       ,mainAreaClicked: mainAreaClicked
-                      ,timeUpReceived: timeUpReceived
-                      ,showNeighbourCount: showNeighbourCount};
+                      ,timerState: timerState};
    return _elm.Main.values;
 };
 Elm.Maybe = Elm.Maybe || {};
@@ -3386,6 +3375,29 @@ Elm.Model.make = function (_elm) {
       return {ctor: "CellCoord"
              ,_0: a};
    };
+   var mapGameState = F2(function (func,
+   game) {
+      return function () {
+         var perCell = F3(function (x,
+         y,
+         cell_state) {
+            return A2(func,
+            CellCoord({ctor: "_Tuple2"
+                      ,_0: x
+                      ,_1: y}),
+            game);
+         });
+         var perCells = F2(function (x,
+         cells) {
+            return A2($Array.indexedMap,
+            perCell(x),
+            cells);
+         });
+         return A2($Array.indexedMap,
+         perCells,
+         game);
+      }();
+   });
    var Dead = {ctor: "Dead"};
    var getCellState = F2(function (_v3,
    game) {
@@ -3457,19 +3469,19 @@ Elm.Model.make = function (_elm) {
                                            _v17._0),
                                            game);}
                                       _U.badCase($moduleName,
-                                      "between lines 56 and 59");
+                                      "between lines 78 and 81");
                                    }();
                                  case "Nothing": return game;}
                               _U.badCase($moduleName,
-                              "between lines 55 and 60");
+                              "between lines 77 and 82");
                            }();
                          case "Nothing": return game;}
                       _U.badCase($moduleName,
-                      "between lines 54 and 60");
+                      "between lines 76 and 82");
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 54 and 60");
+         "between lines 76 and 82");
       }();
    });
    var kCELL_COUNT_H = 30;
@@ -3553,6 +3565,32 @@ Elm.Model.make = function (_elm) {
          "between lines 32 and 41");
       }();
    });
+   var evolveCell = F2(function (cell_coord,
+   game) {
+      return function () {
+         var n = A2(getNeighbourCount,
+         cell_coord,
+         game);
+         return function () {
+            var _v36 = A2(getCellState,
+            cell_coord,
+            game);
+            switch (_v36.ctor)
+            {case "Alive": return _U.cmp(n,
+                 2) < 0 ? Dead : _U.cmp(n,
+                 3) > 0 ? Dead : Alive;
+               case "Dead": return _U.eq(n,
+                 3) ? Alive : Dead;}
+            _U.badCase($moduleName,
+            "between lines 59 and 66");
+         }();
+      }();
+   });
+   var evolveStep = function (game) {
+      return A2(mapGameState,
+      evolveCell,
+      game);
+   };
    _elm.Model.values = {_op: _op
                        ,kCELL_COUNT_W: kCELL_COUNT_W
                        ,kCELL_COUNT_H: kCELL_COUNT_H
@@ -3563,6 +3601,9 @@ Elm.Model.make = function (_elm) {
                        ,make_immutable: make_immutable
                        ,getCellState: getCellState
                        ,getNeighbourCount: getNeighbourCount
+                       ,evolveStep: evolveStep
+                       ,mapGameState: mapGameState
+                       ,evolveCell: evolveCell
                        ,combinations: combinations
                        ,revertCell: revertCell};
    return _elm.Model.values;
@@ -10498,13 +10539,13 @@ Elm.Update.make = function (_elm) {
    timer_state) {
       return space_pressed ? $Basics.not(timer_state) : timer_state;
    });
-   var timerState = A3($Signal.foldp,
+   var timerStateChanged = A3($Signal.foldp,
    changeTimerState,
    false,
    $Keyboard.space);
    var timeUp = A2($Time.fpsWhen,
    1,
-   timerState);
+   timerStateChanged);
    var cellClicked = A3($Signal.filterMap,
    $View.mousePosToCellCoord,
    $Model.CellCoord({ctor: "_Tuple2"
@@ -10530,7 +10571,7 @@ Elm.Update.make = function (_elm) {
                    break;}
               break;
             case "TimeUp":
-            return game_state;}
+            return $Model.evolveStep(game_state);}
          _U.badCase($moduleName,
          "between lines 25 and 27");
       }();
@@ -10563,7 +10604,7 @@ Elm.Update.make = function (_elm) {
                         ,cellClicked: cellClicked
                         ,timeUp: timeUp
                         ,changeTimerState: changeTimerState
-                        ,timerState: timerState};
+                        ,timerStateChanged: timerStateChanged};
    return _elm.Update.values;
 };
 Elm.View = Elm.View || {};
