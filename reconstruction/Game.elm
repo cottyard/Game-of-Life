@@ -5,23 +5,35 @@ import Graphics.Collage exposing (Form, move)
 
 import Cell
 
+cell_count_w = 30
+cell_count_h = 30
+
 draw : List Form
-draw = mapWith [move (50, 50), move (50, 70)] [Cell.draw Cell.Dead, Cell.draw Cell.Alive]
+draw = mapWith arrangementFuncs (List.repeat cell_count_h (Cell.draw Cell.Dead))
+
+move_Int : (Int, Int) -> Form -> Form
+move_Int (x, y) = move (toFloat x, toFloat y)
+
+arrangementFuncs : List (Form -> Form)
+arrangementFuncs =
+  List.map (move_Int << (,) 0) (rangeIntList 0 Cell.size cell_count_h)
+
+rangeIntList : Int -> Int -> Int -> List Int
+rangeIntList begin step size =
+  List.map ((*) step >> (+) begin) [0..size - 1]
 
 mapWith : List (a -> a) -> List a -> List a
-mapWith fss xss =
-  case xss of
+mapWith fs xs =
+  case xs of
     []     -> []
-    (x::xs) -> let (f::fs) = fss in
-      (f x) :: mapWith fs xs
+    (x::xrest) -> let (f::frest) = fs in
+      (f x) :: mapWith frest xrest
 
 
 --type alias Model = Array (Array Cell.Model)
 --type alias CellCoord = (Int, Int)
 --type Update = CellClick CellCoord | TimeUp Time
 
---cell_count_w = 30
---cell_count_h = 30
 
 
 --update : Update -> Model -> Model
