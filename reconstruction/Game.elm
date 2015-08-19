@@ -9,26 +9,31 @@ cell_count_w = 30
 cell_count_h = 30
 
 draw : List Form
-draw = mapWith arrangementFuncs (List.repeat cell_count_h (Cell.draw Cell.Dead))
+draw = 
+  zipWith (\f c -> f c)
+          (List.concat arrangementFuncs)
+          (List.concat (List.repeat cell_count_w (List.repeat cell_count_h (Cell.draw Cell.Dead))))
 
 move_Int : (Int, Int) -> Form -> Form
-move_Int (x, y) = move (toFloat x, toFloat y)
+move_Int (x, y) = 
+  move (toFloat x, toFloat y)
 
-arrangementFuncs : List (Form -> Form)
+arrangementFuncs : List (List (Form -> Form))
 arrangementFuncs =
-  List.map (move_Int << (,) 0) (rangeIntList 0 Cell.size cell_count_h)
+  let getColumnFuncs xPos =
+        List.map (move_Int << (,) xPos) (rangeIntList 0 Cell.size cell_count_h)
+  in List.map getColumnFuncs (rangeIntList 0 Cell.size cell_count_w)
 
 rangeIntList : Int -> Int -> Int -> List Int
 rangeIntList begin step size =
   List.map ((*) step >> (+) begin) [0..size - 1]
 
-mapWith : List (a -> a) -> List a -> List a
-mapWith fs xs =
-  case xs of
-    []     -> []
-    (x::xrest) -> let (f::frest) = fs in
-      (f x) :: mapWith frest xrest
-
+zipWith : (a -> b -> c) -> List a -> List b -> List c
+zipWith f l1 l2 =
+  case l1 of
+    []      -> []
+    (x::xs) -> let (y::ys) = l2 in
+      (f x y) :: (zipWith f xs ys)
 
 --type alias Model = Array (Array Cell.Model)
 --type alias CellCoord = (Int, Int)
