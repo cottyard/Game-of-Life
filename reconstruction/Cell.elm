@@ -17,7 +17,7 @@ reverse model =
 
 -- view
 
-size = 20
+size = 15
 
 draw : Model -> Form
 draw state = 

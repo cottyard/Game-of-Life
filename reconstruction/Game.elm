@@ -1,18 +1,31 @@
 module Game (draw) where
 
 import Graphics.Collage exposing (Form, move)
---import Array exposing (Array, get, set)
-
+import Array exposing (Array)
 import Cell
 
-cell_count_w = 30
-cell_count_h = 30
+type alias Model = Array (Array Cell.Model)
+
+cell_count_w = 100
+cell_count_h = 50
+
+-- model
+
+init : Model
+init =
+  Array.repeat cell_count_w (Array.repeat cell_count_h Cell.Dead)
+
+drawCells : Model -> List (List Form)
+drawCells model =
+  Array.map (Array.toList << Array.map Cell.draw) model |> Array.toList
+
+-- view
 
 draw : List Form
 draw = 
   zipWith (\f c -> f c)
           (List.concat arrangementFuncs)
-          (List.concat (List.repeat cell_count_w (List.repeat cell_count_h (Cell.draw Cell.Dead))))
+          (List.concat <| drawCells init)
 
 move_Int : (Int, Int) -> Form -> Form
 move_Int (x, y) = 
@@ -35,11 +48,9 @@ zipWith f l1 l2 =
     (x::xs) -> let (y::ys) = l2 in
       (f x y) :: (zipWith f xs ys)
 
---type alias Model = Array (Array Cell.Model)
+
 --type alias CellCoord = (Int, Int)
 --type Update = CellClick CellCoord | TimeUp Time
-
-
 
 --update : Update -> Model -> Model
 --update update model =
