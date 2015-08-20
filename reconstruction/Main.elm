@@ -4,6 +4,7 @@ import Graphics.Collage exposing (collage, Form, move)
 import Mouse
 import Time exposing (Time)
 import Signal exposing ((<~))
+import Keyboard
 
 (canvas_width, canvas_height) = (1600, 800)
 (mouse_calib_x, mouse_calib_y) = (50, 765)
@@ -24,8 +25,12 @@ incomingMouseClick_calibed =
 
 clock : Signal Time
 clock =
-  Signal.constant Time.second
-  -- Time.fpsWhen 1 timerStateChanged
+  -- Signal.constant Time.second
+  Time.fpsWhen 1 incomingToggleTimer
+
+incomingToggleTimer : Signal Bool
+incomingToggleTimer =
+  Signal.foldp toggleTimer False Keyboard.space
 
 cellClick_live : Signal Game.CellCoord
 cellClick_live =
@@ -41,7 +46,7 @@ info_live =
 
 incomingUpdate : Signal Game.Update
 incomingUpdate =
-  Signal.merge (Game.CellClick <~ cellClick_live) (Game.TimeUp <~ clock)
+  Signal.merge (Game.CellClick <~ cellClick_live) (Game.Clock <~ clock)
 
 scene_live : Signal (List Form) -> Signal Element
 scene_live =
@@ -69,3 +74,7 @@ scene forms =
 calibrate : (Float, Float) -> List Form -> List Form
 calibrate offset forms =
   List.map (move offset) forms
+
+toggleTimer : Bool -> Bool -> Bool
+toggleTimer spacePressed timerState =
+  if spacePressed then not timerState else timerState

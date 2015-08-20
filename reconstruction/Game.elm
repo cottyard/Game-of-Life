@@ -1,5 +1,5 @@
 module Game (init, draw, update, pixelToCellCoord, 
-  Model, Update (CellClick, TimeUp), CellCoord (CellCoord)) where
+  Model, Update (CellClick, Clock), CellCoord (CellCoord)) where
 
 import Graphics.Collage exposing (Form, move)
 import Array exposing (Array)
@@ -10,7 +10,7 @@ import Matrix exposing (Matrix)
 
 type alias Model = Matrix Cell.Model
 type CellCoord = CellCoord (Int, Int)
-type Update = CellClick CellCoord | TimeUp Time
+type Update = CellClick CellCoord | Clock Time
 
 cell_count_w = 100
 cell_count_h = 50
@@ -23,8 +23,32 @@ init =
 
 revertCell : CellCoord -> Model -> Model
 revertCell (CellCoord coord) model =
-  let cell_model = Matrix.get model coord 
-  in Matrix.set model coord (Cell.reverse cell_model)
+  let cellModel = Matrix.get model coord 
+  in Matrix.set model coord (Cell.reverse cellModel)
+
+aliveNeighbours : CellCoord -> Model -> Int
+aliveNeighbours (CellCoord coord) model =
+  let countAlive cellModel count =
+    case cellModel of
+      Cell.Alive -> count + 1
+      Cell.Dead -> count
+  in List.foldl countAlive 0 (Matrix.neighbours model coord)
+
+evolveCell : CellCoord -> Model -> Cell.Model
+evolveCell (CellCoord coord) model =
+  let n = aliveNeighbours (CellCoord coord) model
+  in case Matrix.get model coord of
+    Cell.Alive -> if
+      | n < 2 -> Cell.Dead
+      | n > 3 -> Cell.Dead
+      | otherwise -> Cell.Alive
+    Cell.Dead -> if
+      | n == 3 -> Cell.Alive
+      | otherwise -> Cell.Dead
+
+evolve : Model -> Model
+evolve model =
+  Matrix.indexedMap (\index _ -> evolveCell (CellCoord index) model) model
 
 -- view
 
@@ -84,4 +108,4 @@ update : Update -> Model -> Model
 update update model =
   case update of
     CellClick (CellCoord (x, y)) -> revertCell (CellCoord (x, y)) model
-    TimeUp _ -> model
+    Clock _ -> evolve model
