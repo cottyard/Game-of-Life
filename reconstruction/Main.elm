@@ -29,7 +29,7 @@ clock =
 
 cellClick_live : Signal Game.CellCoord
 cellClick_live =
-  Signal.filterMap Game.mousePosToCellCoord (Game.CellCoord (0, 0)) incomingMouseClick_calibed
+  Signal.filterMap Game.pixelToCellCoord (Game.CellCoord (0, 0)) incomingMouseClick_calibed
 
 game_live : Signal Game.Model
 game_live =

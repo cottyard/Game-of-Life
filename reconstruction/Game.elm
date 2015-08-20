@@ -1,4 +1,4 @@
-module Game (init, draw, update, mousePosToCellCoord, 
+module Game (init, draw, update, pixelToCellCoord, 
   Model, Update (CellClick, TimeUp), CellCoord (CellCoord)) where
 
 import Graphics.Collage exposing (Form, move)
@@ -6,8 +6,9 @@ import Array exposing (Array)
 import Cell
 import Trampoline exposing (Trampoline, trampoline)
 import Time exposing (Time)
+import Matrix exposing (Matrix)
 
-type alias Model = Array (Array Cell.Model)
+type alias Model = Matrix Cell.Model
 type CellCoord = CellCoord (Int, Int)
 type Update = CellClick CellCoord | TimeUp Time
 
@@ -18,16 +19,12 @@ cell_count_h = 50
 
 init : Model
 init =
-  Array.repeat cell_count_w (Array.repeat cell_count_h Cell.Dead)
+  Matrix.create (cell_count_w, cell_count_h) Cell.Dead
 
 revertCell : CellCoord -> Model -> Model
-revertCell (CellCoord (x, y)) model =
-  case Array.get x model of
-    Just column -> case Array.get y column of
-      Just state ->
-        Array.set x (Array.set y (Cell.reverse state) column) model
-      Nothing -> model
-    Nothing -> model
+revertCell (CellCoord coord) model =
+  let cell_model = Matrix.get model coord 
+  in Matrix.set model coord (Cell.reverse cell_model)
 
 -- view
 
@@ -39,7 +36,7 @@ draw model =
 
 drawCells : Model -> List (List Form)
 drawCells model =
-  Array.map (Array.toList << Array.map Cell.draw) model |> Array.toList
+  Array.map (Array.toList << Array.map Cell.draw) (Matrix.toArray model) |> Array.toList
 
 move_Int : (Int, Int) -> Form -> Form
 move_Int (x, y) = 
@@ -73,8 +70,8 @@ zipWith_iter' f l1 l2 acc =
     (x::xs) -> let (y::ys) = l2 in
       Trampoline.Continue (\() -> zipWith_iter' f xs ys (f x y::acc))
 
-mousePosToCellCoord : (Int, Int) -> Maybe CellCoord
-mousePosToCellCoord (x, y) =
+pixelToCellCoord : (Int, Int) -> Maybe CellCoord
+pixelToCellCoord (x, y) =
   let x_coor = (x + Cell.size) // Cell.size - 1
       y_coor = (y + Cell.size) // Cell.size - 1
   in if | y_coor >= cell_count_h || y_coor < 0 ||
@@ -88,11 +85,3 @@ update update model =
   case update of
     CellClick (CellCoord (x, y)) -> revertCell (CellCoord (x, y)) model
     TimeUp _ -> model
-
-
---getCell : CellCoord -> Model -> Cell.Model
---getCell (CellCoord (x, y)) game =
---  case get x game of
---    Just line -> case get y line of
---      Just state -> state
---    Nothing -> Dead
