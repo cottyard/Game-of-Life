@@ -270,6 +270,56 @@ Elm.Basics.make = function (_elm) {
                         ,GT: GT};
    return _elm.Basics.values;
 };
+Elm.Cell = Elm.Cell || {};
+Elm.Cell.make = function (_elm) {
+   "use strict";
+   _elm.Cell = _elm.Cell || {};
+   if (_elm.Cell.values)
+   return _elm.Cell.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Cell",
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var size = 15;
+   var empty = $Graphics$Collage.square($Basics.toFloat(size));
+   var draw = function (state) {
+      return function () {
+         switch (state.ctor)
+         {case "Alive":
+            return $Graphics$Collage.filled($Color.black)(empty);
+            case "Dead":
+            return $Graphics$Collage.outlined($Graphics$Collage.defaultLine)(empty);}
+         _U.badCase($moduleName,
+         "between lines 24 and 26");
+      }();
+   };
+   var Dead = {ctor: "Dead"};
+   var Alive = {ctor: "Alive"};
+   var reverse = function (model) {
+      return function () {
+         switch (model.ctor)
+         {case "Alive": return Dead;
+            case "Dead": return Alive;}
+         _U.badCase($moduleName,
+         "between lines 14 and 16");
+      }();
+   };
+   _elm.Cell.values = {_op: _op
+                      ,reverse: reverse
+                      ,draw: draw
+                      ,size: size
+                      ,Alive: Alive
+                      ,Dead: Dead};
+   return _elm.Cell.values;
+};
 Elm.Char = Elm.Char || {};
 Elm.Char.make = function (_elm) {
    "use strict";
@@ -1800,6 +1850,306 @@ Elm.Dict.make = function (_elm) {
                       ,fromList: fromList};
    return _elm.Dict.values;
 };
+Elm.Game = Elm.Game || {};
+Elm.Game.make = function (_elm) {
+   "use strict";
+   _elm.Game = _elm.Game || {};
+   if (_elm.Game.values)
+   return _elm.Game.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Game",
+   $Array = Elm.Array.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Cell = Elm.Cell.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Matrix = Elm.Matrix.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Trampoline = Elm.Trampoline.make(_elm);
+   var zipWith_iter$ = F4(function (f,
+   l1,
+   l2,
+   acc) {
+      return function () {
+         switch (l1.ctor)
+         {case "::": return function () {
+                 var _raw = l2,
+                 $ = _raw.ctor === "::" ? _raw : _U.badCase($moduleName,
+                 "on line 94, column 30 to 32"),
+                 y = $._0,
+                 ys = $._1;
+                 return $Trampoline.Continue(function (_v3) {
+                    return function () {
+                       switch (_v3.ctor)
+                       {case "_Tuple0":
+                          return A4(zipWith_iter$,
+                            f,
+                            l1._1,
+                            ys,
+                            A2($List._op["::"],
+                            A2(f,l1._0,y),
+                            acc));}
+                       _U.badCase($moduleName,
+                       "on line 95, column 35 to 68");
+                    }();
+                 });
+              }();
+            case "[]":
+            return $Trampoline.Done(acc);}
+         _U.badCase($moduleName,
+         "between lines 92 and 95");
+      }();
+   });
+   var zipWith_iter = F3(function (f,
+   l1,
+   l2) {
+      return $Trampoline.trampoline(A4(zipWith_iter$,
+      f,
+      l1,
+      l2,
+      _L.fromArray([])));
+   });
+   var zipWith = F3(function (f,
+   l1,
+   l2) {
+      return function () {
+         switch (l1.ctor)
+         {case "::": return function () {
+                 var _raw = l2,
+                 $ = _raw.ctor === "::" ? _raw : _U.badCase($moduleName,
+                 "on line 84, column 30 to 32"),
+                 y = $._0,
+                 ys = $._1;
+                 return A2($List._op["::"],
+                 A2(f,l1._0,y),
+                 A3(zipWith,f,l1._1,ys));
+              }();
+            case "[]":
+            return _L.fromArray([]);}
+         _U.badCase($moduleName,
+         "between lines 82 and 85");
+      }();
+   });
+   var rangeIntList = F3(function (begin,
+   step,
+   size) {
+      return A2($List.map,
+      function ($) {
+         return F2(function (x,y) {
+            return x + y;
+         })(begin)(F2(function (x,y) {
+            return x * y;
+         })(step)($));
+      },
+      _L.range(0,size - 1));
+   });
+   var move_Int = function (_v8) {
+      return function () {
+         switch (_v8.ctor)
+         {case "_Tuple2":
+            return $Graphics$Collage.move({ctor: "_Tuple2"
+                                          ,_0: $Basics.toFloat(_v8._0)
+                                          ,_1: $Basics.toFloat(_v8._1)});}
+         _U.badCase($moduleName,
+         "on line 67, column 3 to 29");
+      }();
+   };
+   var drawCells = function (model) {
+      return $Array.toList(A2($Array.map,
+      function ($) {
+         return $Array.toList($Array.map($Cell.draw)($));
+      },
+      $Matrix.toArray(model)));
+   };
+   var aliveNeighbours = F2(function (_v12,
+   model) {
+      return function () {
+         switch (_v12.ctor)
+         {case "CellCoord":
+            return function () {
+                 var countAlive = F2(function (cellModel,
+                 count) {
+                    return function () {
+                       switch (cellModel.ctor)
+                       {case "Alive": return count + 1;
+                          case "Dead": return count;}
+                       _U.badCase($moduleName,
+                       "between lines 32 and 35");
+                    }();
+                 });
+                 return A3($List.foldl,
+                 countAlive,
+                 0,
+                 A2($Matrix.neighbours,
+                 model,
+                 _v12._0));
+              }();}
+         _U.badCase($moduleName,
+         "between lines 31 and 35");
+      }();
+   });
+   var revertCell = F2(function (_v16,
+   model) {
+      return function () {
+         switch (_v16.ctor)
+         {case "CellCoord":
+            return function () {
+                 var cellModel = A2($Matrix.get,
+                 model,
+                 _v16._0);
+                 return A3($Matrix.set,
+                 model,
+                 _v16._0,
+                 $Cell.reverse(cellModel));
+              }();}
+         _U.badCase($moduleName,
+         "between lines 26 and 27");
+      }();
+   });
+   var cell_count_h = 50;
+   var cell_count_w = 100;
+   var init = A2($Matrix.create,
+   {ctor: "_Tuple2"
+   ,_0: cell_count_w
+   ,_1: cell_count_h},
+   $Cell.Dead);
+   var arrangementFuncs = function () {
+      var getColumnFuncs = function (xPos) {
+         return A2($List.map,
+         function ($) {
+            return move_Int(F2(function (v0,
+            v1) {
+               return {ctor: "_Tuple2"
+                      ,_0: v0
+                      ,_1: v1};
+            })(xPos)($));
+         },
+         A3(rangeIntList,
+         0,
+         $Cell.size,
+         cell_count_h));
+      };
+      return A2($List.map,
+      getColumnFuncs,
+      A3(rangeIntList,
+      0,
+      $Cell.size,
+      cell_count_w));
+   }();
+   var draw = function (model) {
+      return A3(zipWith_iter,
+      F2(function (f,c) {
+         return f(c);
+      }),
+      $List.concat(arrangementFuncs),
+      $List.concat(drawCells(model)));
+   };
+   var Clock = function (a) {
+      return {ctor: "Clock",_0: a};
+   };
+   var CellClick = function (a) {
+      return {ctor: "CellClick"
+             ,_0: a};
+   };
+   var CellCoord = function (a) {
+      return {ctor: "CellCoord"
+             ,_0: a};
+   };
+   var evolveCell = F2(function (_v19,
+   model) {
+      return function () {
+         switch (_v19.ctor)
+         {case "CellCoord":
+            return function () {
+                 var n = A2(aliveNeighbours,
+                 CellCoord(_v19._0),
+                 model);
+                 return function () {
+                    var _v22 = A2($Matrix.get,
+                    model,
+                    _v19._0);
+                    switch (_v22.ctor)
+                    {case "Alive": return _U.cmp(n,
+                         2) < 0 ? $Cell.Dead : _U.cmp(n,
+                         3) > 0 ? $Cell.Dead : $Cell.Alive;
+                       case "Dead": return _U.eq(n,
+                         3) ? $Cell.Alive : $Cell.Dead;}
+                    _U.badCase($moduleName,
+                    "between lines 40 and 47");
+                 }();
+              }();}
+         _U.badCase($moduleName,
+         "between lines 39 and 47");
+      }();
+   });
+   var evolve = function (model) {
+      return A2($Matrix.indexedMap,
+      F2(function (index,_v23) {
+         return function () {
+            return A2(evolveCell,
+            CellCoord(index),
+            model);
+         }();
+      }),
+      model);
+   };
+   var pixelToCellCoord = function (_v25) {
+      return function () {
+         switch (_v25.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var y_coor = ((_v25._1 + $Cell.size) / $Cell.size | 0) - 1;
+                 var x_coor = ((_v25._0 + $Cell.size) / $Cell.size | 0) - 1;
+                 return _U.cmp(y_coor,
+                 cell_count_h) > -1 || (_U.cmp(y_coor,
+                 0) < 0 || (_U.cmp(x_coor,
+                 cell_count_w) > -1 || _U.cmp(x_coor,
+                 0) < 0)) ? $Maybe.Nothing : $Maybe.Just(CellCoord({ctor: "_Tuple2"
+                                                                   ,_0: x_coor
+                                                                   ,_1: y_coor}));
+              }();}
+         _U.badCase($moduleName,
+         "between lines 99 and 103");
+      }();
+   };
+   var update = F2(function (update,
+   model) {
+      return function () {
+         switch (update.ctor)
+         {case "CellClick":
+            switch (update._0.ctor)
+              {case "CellCoord":
+                 switch (update._0._0.ctor)
+                   {case "_Tuple2":
+                      return A2(revertCell,
+                        CellCoord({ctor: "_Tuple2"
+                                  ,_0: update._0._0._0
+                                  ,_1: update._0._0._1}),
+                        model);}
+                   break;}
+              break;
+            case "Clock":
+            return evolve(model);}
+         _U.badCase($moduleName,
+         "between lines 109 and 111");
+      }();
+   });
+   _elm.Game.values = {_op: _op
+                      ,init: init
+                      ,draw: draw
+                      ,update: update
+                      ,pixelToCellCoord: pixelToCellCoord
+                      ,CellClick: CellClick
+                      ,Clock: Clock
+                      ,CellCoord: CellCoord};
+   return _elm.Game.values;
+};
 Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.Collage = Elm.Graphics.Collage || {};
 Elm.Graphics.Collage.make = function (_elm) {
@@ -3219,43 +3569,367 @@ Elm.Main.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Main",
    $Basics = Elm.Basics.make(_elm),
+   $Game = Elm.Game.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Keyboard = Elm.Keyboard.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Update = Elm.Update.make(_elm),
-   $View = Elm.View.make(_elm);
-   var timerState = A2($Signal._op["<~"],
-   $Graphics$Element.show,
-   $Update.timerStateChanged);
-   var mainAreaClicked = A2($Signal._op["<~"],
-   $Graphics$Element.show,
-   $Update.cellClicked);
-   var mousePosUpdated = A2($Signal._op["<~"],
-   $Graphics$Element.show,
-   $Mouse.position);
-   var mainAreaUpdated = A2($Signal._op["<~"],
-   $View.scene,
-   $Update.gameStateUpdated);
-   var main = A5($Signal.map4,
-   F4(function (e1,e2,e3,e4) {
+   $Time = Elm.Time.make(_elm);
+   var toggleTimer = F2(function (spacePressed,
+   timerState) {
+      return spacePressed ? $Basics.not(timerState) : timerState;
+   });
+   var calibrate = F2(function (offset,
+   forms) {
+      return A2($List.map,
+      $Graphics$Collage.move(offset),
+      forms);
+   });
+   var layout = F2(function (e1,
+   e2) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.right,
-      _L.fromArray([e1,e2,e3,e4]));
-   }),
-   mainAreaUpdated,
-   mousePosUpdated,
-   mainAreaClicked,
-   timerState);
+      _L.fromArray([e1,e2]));
+   });
+   var layout_live = $Signal.map2(layout);
+   var draw_live = $Signal.map($Game.draw);
+   var info_live = A2($Signal._op["<~"],
+   $Graphics$Element.show,
+   $Mouse.position);
+   var incomingToggleTimer = A3($Signal.foldp,
+   toggleTimer,
+   false,
+   $Keyboard.space);
+   var clock = A2($Time.fpsWhen,
+   1,
+   incomingToggleTimer);
+   var incomingMouseClick = A2($Signal.sampleOn,
+   $Mouse.clicks,
+   $Mouse.position);
+   var $ = {ctor: "_Tuple2"
+           ,_0: 50
+           ,_1: 765},
+   mouse_calib_x = $._0,
+   mouse_calib_y = $._1;
+   var incomingMouseClick_calibed = A2($Signal._op["<~"],
+   function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return {ctor: "_Tuple2"
+                   ,_0: _v0._0 - mouse_calib_x
+                   ,_1: mouse_calib_y - _v0._1};}
+         _U.badCase($moduleName,
+         "on line 24, column 16 to 52");
+      }();
+   },
+   incomingMouseClick);
+   var cellClick_live = A3($Signal.filterMap,
+   $Game.pixelToCellCoord,
+   $Game.CellCoord({ctor: "_Tuple2"
+                   ,_0: 0
+                   ,_1: 0}),
+   incomingMouseClick_calibed);
+   var incomingUpdate = A2($Signal.merge,
+   A2($Signal._op["<~"],
+   $Game.CellClick,
+   cellClick_live),
+   A2($Signal._op["<~"],
+   $Game.Clock,
+   clock));
+   var game_live = A3($Signal.foldp,
+   $Game.update,
+   $Game.init,
+   incomingUpdate);
+   var $ = {ctor: "_Tuple2"
+           ,_0: 1600
+           ,_1: 800},
+   canvas_width = $._0,
+   canvas_height = $._1;
+   var scene = function (forms) {
+      return A3($Graphics$Collage.collage,
+      canvas_width,
+      canvas_height,
+      A2(calibrate,
+      {ctor: "_Tuple2"
+      ,_0: (0 - canvas_width) / 2 + 50
+      ,_1: (0 - canvas_height) / 2 + 50},
+      forms));
+   };
+   var scene_live = $Signal.map(scene);
+   var main = A2(layout_live,
+   scene_live(draw_live(game_live)),
+   info_live);
    _elm.Main.values = {_op: _op
+                      ,canvas_height: canvas_height
+                      ,canvas_width: canvas_width
+                      ,mouse_calib_x: mouse_calib_x
+                      ,mouse_calib_y: mouse_calib_y
                       ,main: main
-                      ,mainAreaUpdated: mainAreaUpdated
-                      ,mousePosUpdated: mousePosUpdated
-                      ,mainAreaClicked: mainAreaClicked
-                      ,timerState: timerState};
+                      ,incomingMouseClick: incomingMouseClick
+                      ,incomingMouseClick_calibed: incomingMouseClick_calibed
+                      ,clock: clock
+                      ,incomingToggleTimer: incomingToggleTimer
+                      ,cellClick_live: cellClick_live
+                      ,game_live: game_live
+                      ,info_live: info_live
+                      ,incomingUpdate: incomingUpdate
+                      ,scene_live: scene_live
+                      ,draw_live: draw_live
+                      ,layout_live: layout_live
+                      ,layout: layout
+                      ,scene: scene
+                      ,calibrate: calibrate
+                      ,toggleTimer: toggleTimer};
    return _elm.Main.values;
+};
+Elm.Matrix = Elm.Matrix || {};
+Elm.Matrix.make = function (_elm) {
+   "use strict";
+   _elm.Matrix = _elm.Matrix || {};
+   if (_elm.Matrix.values)
+   return _elm.Matrix.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Matrix",
+   $Array = Elm.Array.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var get = F2(function (_v0,
+   _v1) {
+      return function () {
+         switch (_v1.ctor)
+         {case "_Tuple2":
+            return function () {
+                 switch (_v0.ctor)
+                 {case "Matrix":
+                    return function () {
+                         var result = A2($Maybe.andThen,
+                         A2($Array.get,_v1._0,_v0._0),
+                         function (arr) {
+                            return A2($Array.get,
+                            _v1._1,
+                            arr);
+                         });
+                         return function () {
+                            switch (result.ctor)
+                            {case "Just": return result._0;
+                               case "Nothing": return _v0._1;}
+                            _U.badCase($moduleName,
+                            "between lines 38 and 40");
+                         }();
+                      }();}
+                 _U.badCase($moduleName,
+                 "between lines 35 and 40");
+              }();}
+         _U.badCase($moduleName,
+         "between lines 35 and 40");
+      }();
+   });
+   var size = function (_v10) {
+      return function () {
+         switch (_v10.ctor)
+         {case "Matrix":
+            return function () {
+                 var xsize = $Array.length(_v10._0);
+                 return function () {
+                    var _v14 = A2($Array.get,
+                    0,
+                    _v10._0);
+                    switch (_v14.ctor)
+                    {case "Just":
+                       return {ctor: "_Tuple2"
+                              ,_0: xsize
+                              ,_1: $Array.length(_v14._0)};
+                       case "Nothing":
+                       return {ctor: "_Tuple2"
+                              ,_0: xsize
+                              ,_1: 0};}
+                    _U.badCase($moduleName,
+                    "between lines 29 and 31");
+                 }();
+              }();}
+         _U.badCase($moduleName,
+         "between lines 28 and 31");
+      }();
+   };
+   var neighbours = F2(function (m,
+   _v16) {
+      return function () {
+         switch (_v16.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var actualIndex = function (_v20) {
+                    return function () {
+                       switch (_v20.ctor)
+                       {case "_Tuple2":
+                          return {ctor: "_Tuple2"
+                                 ,_0: _v16._0 + _v20._0
+                                 ,_1: _v16._1 + _v20._1};}
+                       _U.badCase($moduleName,
+                       "on line 56, column 31 to 45");
+                    }();
+                 };
+                 var indexes = _L.fromArray([{ctor: "_Tuple2"
+                                             ,_0: -1
+                                             ,_1: -1}
+                                            ,{ctor: "_Tuple2",_0: -1,_1: 0}
+                                            ,{ctor: "_Tuple2",_0: -1,_1: 1}
+                                            ,{ctor: "_Tuple2",_0: 0,_1: -1}
+                                            ,{ctor: "_Tuple2",_0: 0,_1: 1}
+                                            ,{ctor: "_Tuple2",_0: 1,_1: -1}
+                                            ,{ctor: "_Tuple2",_0: 1,_1: 0}
+                                            ,{ctor: "_Tuple2"
+                                             ,_0: 1
+                                             ,_1: 1}]);
+                 var $ = size(m),
+                 size_x = $._0,
+                 size_y = $._1;
+                 var makeToroidal = function (_v24) {
+                    return function () {
+                       switch (_v24.ctor)
+                       {case "_Tuple2":
+                          return {ctor: "_Tuple2"
+                                 ,_0: A2($Basics._op["%"],
+                                 _v24._0,
+                                 size_x)
+                                 ,_1: A2($Basics._op["%"],
+                                 _v24._1,
+                                 size_y)};}
+                       _U.badCase($moduleName,
+                       "on line 57, column 30 to 52");
+                    }();
+                 };
+                 return A2($List.map,
+                 function ($) {
+                    return get(m)(makeToroidal(actualIndex($)));
+                 },
+                 indexes);
+              }();}
+         _U.badCase($moduleName,
+         "between lines 54 and 58");
+      }();
+   });
+   var toArray = function (_v28) {
+      return function () {
+         switch (_v28.ctor)
+         {case "Matrix": return _v28._0;}
+         _U.badCase($moduleName,
+         "on line 24, column 3 to 11");
+      }();
+   };
+   var Matrix = F2(function (a,b) {
+      return {ctor: "Matrix"
+             ,_0: a
+             ,_1: b};
+   });
+   var create = F2(function (_v32,
+   defaultValue) {
+      return function () {
+         switch (_v32.ctor)
+         {case "_Tuple2":
+            return A2(Matrix,
+              A2($Array.repeat,
+              _v32._0,
+              A2($Array.repeat,
+              _v32._1,
+              defaultValue)),
+              defaultValue);}
+         _U.badCase($moduleName,
+         "on line 20, column 3 to 79");
+      }();
+   });
+   var set = F3(function (_v36,
+   _v37,
+   value) {
+      return function () {
+         switch (_v37.ctor)
+         {case "_Tuple2":
+            return function () {
+                 switch (_v36.ctor)
+                 {case "Matrix":
+                    return function () {
+                         var result = A2($Maybe.andThen,
+                         A2($Array.get,_v37._0,_v36._0),
+                         function (arr) {
+                            return function () {
+                               var new_arr = A3($Array.set,
+                               _v37._1,
+                               value,
+                               arr);
+                               return $Maybe.Just(A2(Matrix,
+                               A3($Array.set,
+                               _v37._0,
+                               new_arr,
+                               _v36._0),
+                               _v36._1));
+                            }();
+                         });
+                         return function () {
+                            switch (result.ctor)
+                            {case "Just": return result._0;
+                               case "Nothing":
+                               return A2(Matrix,
+                                 _v36._0,
+                                 _v36._1);}
+                            _U.badCase($moduleName,
+                            "between lines 48 and 50");
+                         }();
+                      }();}
+                 _U.badCase($moduleName,
+                 "between lines 44 and 50");
+              }();}
+         _U.badCase($moduleName,
+         "between lines 44 and 50");
+      }();
+   });
+   var indexedMap = F2(function (f,
+   _v46) {
+      return function () {
+         switch (_v46.ctor)
+         {case "Matrix":
+            return function () {
+                 var perElem = F3(function (x,
+                 y,
+                 elem) {
+                    return A2(f,
+                    {ctor: "_Tuple2",_0: x,_1: y},
+                    elem);
+                 });
+                 var perArr = F2(function (x,
+                 arr) {
+                    return A2($Array.indexedMap,
+                    perElem(x),
+                    arr);
+                 });
+                 return A2(Matrix,
+                 A2($Array.indexedMap,
+                 perArr,
+                 _v46._0),
+                 _v46._1);
+              }();}
+         _U.badCase($moduleName,
+         "between lines 62 and 64");
+      }();
+   });
+   _elm.Matrix.values = {_op: _op
+                        ,get: get
+                        ,set: set
+                        ,create: create
+                        ,size: size
+                        ,toArray: toArray
+                        ,neighbours: neighbours
+                        ,indexedMap: indexedMap};
+   return _elm.Matrix.values;
 };
 Elm.Maybe = Elm.Maybe || {};
 Elm.Maybe.make = function (_elm) {
@@ -3329,284 +4003,6 @@ Elm.Maybe.make = function (_elm) {
                        ,Just: Just
                        ,Nothing: Nothing};
    return _elm.Maybe.values;
-};
-Elm.Model = Elm.Model || {};
-Elm.Model.make = function (_elm) {
-   "use strict";
-   _elm.Model = _elm.Model || {};
-   if (_elm.Model.values)
-   return _elm.Model.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Model",
-   $Array = Elm.Array.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var combinations = F2(function (list_1,
-   list_2) {
-      return function () {
-         switch (list_1.ctor)
-         {case "::":
-            return A2($Basics._op["++"],
-              A2($List.map,
-              F2(function (v0,v1) {
-                 return {ctor: "_Tuple2"
-                        ,_0: v0
-                        ,_1: v1};
-              })(list_1._0),
-              list_2),
-              A2(combinations,
-              list_1._1,
-              list_2));}
-         return _L.fromArray([]);
-      }();
-   });
-   var make_immutable = function (game_state) {
-      return $Array.toList(A2($Array.map,
-      $Array.toList,
-      game_state));
-   };
-   var CellCoord = function (a) {
-      return {ctor: "CellCoord"
-             ,_0: a};
-   };
-   var mapGameState = F2(function (func,
-   game) {
-      return function () {
-         var perCell = F3(function (x,
-         y,
-         cell_state) {
-            return A2(func,
-            CellCoord({ctor: "_Tuple2"
-                      ,_0: x
-                      ,_1: y}),
-            game);
-         });
-         var perCells = F2(function (x,
-         cells) {
-            return A2($Array.indexedMap,
-            perCell(x),
-            cells);
-         });
-         return A2($Array.indexedMap,
-         perCells,
-         game);
-      }();
-   });
-   var Dead = {ctor: "Dead"};
-   var getCellState = F2(function (_v3,
-   game) {
-      return function () {
-         switch (_v3.ctor)
-         {case "CellCoord":
-            switch (_v3._0.ctor)
-              {case "_Tuple2":
-                 return function () {
-                      var _v8 = A2($Array.get,
-                      _v3._0._0,
-                      game);
-                      switch (_v8.ctor)
-                      {case "Just":
-                         return function () {
-                              var _v10 = A2($Array.get,
-                              _v3._0._1,
-                              _v8._0);
-                              switch (_v10.ctor)
-                              {case "Just": return _v10._0;}
-                              _U.badCase($moduleName,
-                              "between lines 26 and 28");
-                           }();
-                         case "Nothing": return Dead;}
-                      _U.badCase($moduleName,
-                      "between lines 25 and 28");
-                   }();}
-              break;}
-         _U.badCase($moduleName,
-         "between lines 25 and 28");
-      }();
-   });
-   var Alive = {ctor: "Alive"};
-   var revertCell = F2(function (_v12,
-   game) {
-      return function () {
-         switch (_v12.ctor)
-         {case "CellCoord":
-            switch (_v12._0.ctor)
-              {case "_Tuple2":
-                 return function () {
-                      var _v17 = A2($Array.get,
-                      _v12._0._0,
-                      game);
-                      switch (_v17.ctor)
-                      {case "Just":
-                         return function () {
-                              var _v19 = A2($Array.get,
-                              _v12._0._1,
-                              _v17._0);
-                              switch (_v19.ctor)
-                              {case "Just":
-                                 return function () {
-                                      switch (_v19._0.ctor)
-                                      {case "Alive":
-                                         return A3($Array.set,
-                                           _v12._0._0,
-                                           A3($Array.set,
-                                           _v12._0._1,
-                                           Dead,
-                                           _v17._0),
-                                           game);
-                                         case "Dead":
-                                         return A3($Array.set,
-                                           _v12._0._0,
-                                           A3($Array.set,
-                                           _v12._0._1,
-                                           Alive,
-                                           _v17._0),
-                                           game);}
-                                      _U.badCase($moduleName,
-                                      "between lines 78 and 81");
-                                   }();
-                                 case "Nothing": return game;}
-                              _U.badCase($moduleName,
-                              "between lines 77 and 82");
-                           }();
-                         case "Nothing": return game;}
-                      _U.badCase($moduleName,
-                      "between lines 76 and 82");
-                   }();}
-              break;}
-         _U.badCase($moduleName,
-         "between lines 76 and 82");
-      }();
-   });
-   var kCELL_COUNT_H = 30;
-   var kCELL_COUNT_W = 30;
-   var initial_game_state = A2($Array.repeat,
-   kCELL_COUNT_H,
-   A2($Array.repeat,
-   kCELL_COUNT_W,
-   Dead));
-   var getNeighbourCount = F2(function (_v22,
-   game) {
-      return function () {
-         switch (_v22.ctor)
-         {case "CellCoord":
-            switch (_v22._0.ctor)
-              {case "_Tuple2":
-                 return function () {
-                      var countAlive = F2(function (cell_state,
-                      alive_count) {
-                         return function () {
-                            switch (cell_state.ctor)
-                            {case "Alive":
-                               return alive_count + 1;
-                               case "Dead":
-                               return alive_count;}
-                            _U.badCase($moduleName,
-                            "between lines 38 and 41");
-                         }();
-                      });
-                      var makeToroidal = function (_v28) {
-                         return function () {
-                            switch (_v28.ctor)
-                            {case "_Tuple2":
-                               return {ctor: "_Tuple2"
-                                      ,_0: A2($Basics._op["%"],
-                                      _v28._0,
-                                      kCELL_COUNT_W)
-                                      ,_1: A2($Basics._op["%"],
-                                      _v28._1,
-                                      kCELL_COUNT_H)};}
-                            _U.badCase($moduleName,
-                            "on line 33, column 30 to 66");
-                         }();
-                      };
-                      var addCoord = function (_v32) {
-                         return function () {
-                            switch (_v32.ctor)
-                            {case "_Tuple2":
-                               return {ctor: "_Tuple2"
-                                      ,_0: _v22._0._0 + _v32._0
-                                      ,_1: _v22._0._1 + _v32._1};}
-                            _U.badCase($moduleName,
-                            "on line 32, column 28 to 42");
-                         }();
-                      };
-                      var neighbour_cell_states = A2($List.map,
-                      function ($) {
-                         return A2($Basics.flip,
-                         getCellState,
-                         game)(CellCoord(makeToroidal(addCoord($))));
-                      },
-                      _L.fromArray([{ctor: "_Tuple2"
-                                    ,_0: -1
-                                    ,_1: -1}
-                                   ,{ctor: "_Tuple2",_0: -1,_1: 0}
-                                   ,{ctor: "_Tuple2",_0: -1,_1: 1}
-                                   ,{ctor: "_Tuple2",_0: 0,_1: -1}
-                                   ,{ctor: "_Tuple2",_0: 0,_1: 1}
-                                   ,{ctor: "_Tuple2",_0: 1,_1: -1}
-                                   ,{ctor: "_Tuple2",_0: 1,_1: 0}
-                                   ,{ctor: "_Tuple2"
-                                    ,_0: 1
-                                    ,_1: 1}]));
-                      return A3($List.foldl,
-                      countAlive,
-                      0,
-                      neighbour_cell_states);
-                   }();}
-              break;}
-         _U.badCase($moduleName,
-         "between lines 32 and 41");
-      }();
-   });
-   var evolveCell = F2(function (cell_coord,
-   game) {
-      return function () {
-         var n = A2(getNeighbourCount,
-         cell_coord,
-         game);
-         return function () {
-            var _v36 = A2(getCellState,
-            cell_coord,
-            game);
-            switch (_v36.ctor)
-            {case "Alive": return _U.cmp(n,
-                 2) < 0 ? Dead : _U.cmp(n,
-                 3) > 0 ? Dead : Alive;
-               case "Dead": return _U.eq(n,
-                 3) ? Alive : Dead;}
-            _U.badCase($moduleName,
-            "between lines 59 and 66");
-         }();
-      }();
-   });
-   var evolveStep = function (game) {
-      return A2(mapGameState,
-      evolveCell,
-      game);
-   };
-   _elm.Model.values = {_op: _op
-                       ,kCELL_COUNT_W: kCELL_COUNT_W
-                       ,kCELL_COUNT_H: kCELL_COUNT_H
-                       ,Alive: Alive
-                       ,Dead: Dead
-                       ,CellCoord: CellCoord
-                       ,initial_game_state: initial_game_state
-                       ,make_immutable: make_immutable
-                       ,getCellState: getCellState
-                       ,getNeighbourCount: getNeighbourCount
-                       ,evolveStep: evolveStep
-                       ,mapGameState: mapGameState
-                       ,evolveCell: evolveCell
-                       ,combinations: combinations
-                       ,revertCell: revertCell};
-   return _elm.Model.values;
 };
 Elm.Mouse = Elm.Mouse || {};
 Elm.Mouse.make = function (_elm) {
@@ -8989,6 +9385,38 @@ Elm.Native.Time.make = function(localRuntime)
 
 };
 
+Elm.Native.Trampoline = {};
+Elm.Native.Trampoline.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Trampoline = localRuntime.Native.Trampoline || {};
+	if (localRuntime.Native.Trampoline.values)
+	{
+		return localRuntime.Native.Trampoline.values;
+	}
+
+	// trampoline : Trampoline a -> a
+	function trampoline(t)
+	{
+		var tramp = t;
+		while(true)
+		{
+			switch(tramp.ctor)
+			{
+				case "Done":
+					return tramp._0;
+				case "Continue":
+					tramp = tramp._0({ ctor: "_Tuple0" });
+					continue;
+			}
+		}
+	}
+
+	return localRuntime.Native.Trampoline.values = {
+		trampoline: trampoline
+	};
+};
+
 Elm.Native.Transform2D = {};
 Elm.Native.Transform2D.make = function(localRuntime) {
 
@@ -10449,6 +10877,32 @@ Elm.Time.make = function (_elm) {
                       ,since: since};
    return _elm.Time.values;
 };
+Elm.Trampoline = Elm.Trampoline || {};
+Elm.Trampoline.make = function (_elm) {
+   "use strict";
+   _elm.Trampoline = _elm.Trampoline || {};
+   if (_elm.Trampoline.values)
+   return _elm.Trampoline.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Trampoline",
+   $Native$Trampoline = Elm.Native.Trampoline.make(_elm);
+   var trampoline = $Native$Trampoline.trampoline;
+   var Continue = function (a) {
+      return {ctor: "Continue"
+             ,_0: a};
+   };
+   var Done = function (a) {
+      return {ctor: "Done",_0: a};
+   };
+   _elm.Trampoline.values = {_op: _op
+                            ,trampoline: trampoline
+                            ,Done: Done
+                            ,Continue: Continue};
+   return _elm.Trampoline.values;
+};
 Elm.Transform2D = Elm.Transform2D || {};
 Elm.Transform2D.make = function (_elm) {
    "use strict";
@@ -10513,234 +10967,4 @@ Elm.Transform2D.make = function (_elm) {
                              ,scaleX: scaleX
                              ,scaleY: scaleY};
    return _elm.Transform2D.values;
-};
-Elm.Update = Elm.Update || {};
-Elm.Update.make = function (_elm) {
-   "use strict";
-   _elm.Update = _elm.Update || {};
-   if (_elm.Update.values)
-   return _elm.Update.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Update",
-   $Basics = Elm.Basics.make(_elm),
-   $Keyboard = Elm.Keyboard.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Model = Elm.Model.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm),
-   $View = Elm.View.make(_elm);
-   var changeTimerState = F2(function (space_pressed,
-   timer_state) {
-      return space_pressed ? $Basics.not(timer_state) : timer_state;
-   });
-   var timerStateChanged = A3($Signal.foldp,
-   changeTimerState,
-   false,
-   $Keyboard.space);
-   var timeUp = A2($Time.fpsWhen,
-   1,
-   timerStateChanged);
-   var cellClicked = A3($Signal.filterMap,
-   $View.mousePosToCellCoord,
-   $Model.CellCoord({ctor: "_Tuple2"
-                    ,_0: 0
-                    ,_1: 0}),
-   A2($Signal.sampleOn,
-   $Mouse.clicks,
-   $Mouse.position));
-   var updateGameState = F2(function (update,
-   game_state) {
-      return function () {
-         switch (update.ctor)
-         {case "CellClick":
-            switch (update._0.ctor)
-              {case "CellCoord":
-                 switch (update._0._0.ctor)
-                   {case "_Tuple2":
-                      return A2($Model.revertCell,
-                        $Model.CellCoord({ctor: "_Tuple2"
-                                         ,_0: update._0._0._0
-                                         ,_1: update._0._0._1}),
-                        game_state);}
-                   break;}
-              break;
-            case "TimeUp":
-            return $Model.evolveStep(game_state);}
-         _U.badCase($moduleName,
-         "between lines 25 and 27");
-      }();
-   });
-   var TimeUp = function (a) {
-      return {ctor: "TimeUp"
-             ,_0: a};
-   };
-   var CellClick = function (a) {
-      return {ctor: "CellClick"
-             ,_0: a};
-   };
-   var updates = A2($Signal.merge,
-   A2($Signal._op["<~"],
-   CellClick,
-   cellClicked),
-   A2($Signal._op["<~"],
-   TimeUp,
-   timeUp));
-   var gameStateUpdated = A3($Signal.foldp,
-   updateGameState,
-   $Model.initial_game_state,
-   updates);
-   _elm.Update.values = {_op: _op
-                        ,CellClick: CellClick
-                        ,TimeUp: TimeUp
-                        ,updates: updates
-                        ,gameStateUpdated: gameStateUpdated
-                        ,updateGameState: updateGameState
-                        ,cellClicked: cellClicked
-                        ,timeUp: timeUp
-                        ,changeTimerState: changeTimerState
-                        ,timerStateChanged: timerStateChanged};
-   return _elm.Update.values;
-};
-Elm.View = Elm.View || {};
-Elm.View.make = function (_elm) {
-   "use strict";
-   _elm.View = _elm.View || {};
-   if (_elm.View.values)
-   return _elm.View.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "View",
-   $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
-   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Model = Elm.Model.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var kCELL_SIZE = 20;
-   var mousePosToCellCoord = function (_v0) {
-      return function () {
-         switch (_v0.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var y_calib = 645;
-                 var x_calib = 22;
-                 var y_coor = ((y_calib - _v0._1 + kCELL_SIZE) / kCELL_SIZE | 0) - 1;
-                 var x_coor = ((_v0._0 - x_calib + kCELL_SIZE) / kCELL_SIZE | 0) - 1;
-                 return _U.cmp(y_coor,
-                 $Model.kCELL_COUNT_H) > -1 || (_U.cmp(y_coor,
-                 0) < 0 || (_U.cmp(x_coor,
-                 $Model.kCELL_COUNT_W) > -1 || _U.cmp(x_coor,
-                 0) < 0)) ? $Maybe.Nothing : $Maybe.Just($Model.CellCoord({ctor: "_Tuple2"
-                                                                          ,_0: y_coor
-                                                                          ,_1: x_coor}));
-              }();}
-         _U.badCase($moduleName,
-         "between lines 53 and 60");
-      }();
-   };
-   var cell = $Graphics$Collage.square($Basics.toFloat(kCELL_SIZE));
-   var living_cell = $Graphics$Collage.filled($Color.black)(cell);
-   var dead_cell = $Graphics$Collage.outlined($Graphics$Collage.defaultLine)(cell);
-   var create_cell = function (state) {
-      return function () {
-         switch (state.ctor)
-         {case "Alive":
-            return living_cell;
-            case "Dead": return dead_cell;}
-         _U.badCase($moduleName,
-         "between lines 34 and 36");
-      }();
-   };
-   var draw_cells_in_line = F3(function (line_state,
-   line_offset,
-   first_cell_offset) {
-      return function () {
-         var iter = F2(function (line_state,
-         cell_count) {
-            return function () {
-               switch (line_state.ctor)
-               {case "::": return function () {
-                       var cell_offset = first_cell_offset + cell_count * kCELL_SIZE;
-                       return A2($List._op["::"],
-                       A2($Graphics$Collage.move,
-                       {ctor: "_Tuple2"
-                       ,_0: $Basics.toFloat(cell_offset)
-                       ,_1: $Basics.toFloat(line_offset)},
-                       create_cell(line_state._0)),
-                       A2(iter,
-                       line_state._1,
-                       cell_count + 1));
-                    }();
-                  case "[]":
-                  return _L.fromArray([]);}
-               _U.badCase($moduleName,
-               "between lines 41 and 49");
-            }();
-         });
-         return A2(iter,line_state,0);
-      }();
-   });
-   var draw_cells = F3(function (game_state,
-   w_begin,
-   h_begin) {
-      return function () {
-         var iter = F2(function (game_state,
-         line_count) {
-            return function () {
-               switch (game_state.ctor)
-               {case "::": return function () {
-                       var line_offset = h_begin + line_count * kCELL_SIZE;
-                       return A2($Basics._op["++"],
-                       A3(draw_cells_in_line,
-                       game_state._0,
-                       line_offset,
-                       w_begin),
-                       A2(iter,
-                       game_state._1,
-                       line_count + 1));
-                    }();
-                  case "[]":
-                  return _L.fromArray([]);}
-               _U.badCase($moduleName,
-               "between lines 24 and 30");
-            }();
-         });
-         return A2(iter,game_state,0);
-      }();
-   });
-   var kCANVAS_HEIGHT = 650;
-   var kCANVAS_WIDTH = 650;
-   var scene = function (game_state) {
-      return A3($Graphics$Collage.collage,
-      kCANVAS_WIDTH,
-      kCANVAS_HEIGHT,
-      A3(draw_cells,
-      $Model.make_immutable(game_state),
-      -300,
-      -300));
-   };
-   _elm.View.values = {_op: _op
-                      ,kCANVAS_WIDTH: kCANVAS_WIDTH
-                      ,kCANVAS_HEIGHT: kCANVAS_HEIGHT
-                      ,kCELL_SIZE: kCELL_SIZE
-                      ,scene: scene
-                      ,draw_cells: draw_cells
-                      ,create_cell: create_cell
-                      ,draw_cells_in_line: draw_cells_in_line
-                      ,mousePosToCellCoord: mousePosToCellCoord
-                      ,cell: cell
-                      ,living_cell: living_cell
-                      ,dead_cell: dead_cell};
-   return _elm.View.values;
 };
