@@ -6,6 +6,7 @@ import Time exposing (Time)
 import Signal exposing ((<~))
 
 (canvas_width, canvas_height) = (1600, 800)
+(mouse_calib_x, mouse_calib_y) = (50, 765)
 
 main : Signal Element
 main = layout_live (game_live |> draw_live |> scene_live) 
@@ -13,9 +14,13 @@ main = layout_live (game_live |> draw_live |> scene_live)
 
 -- signals
 
-mouseClick_live : Signal (Int, Int)
-mouseClick_live =
+incomingMouseClick : Signal (Int, Int)
+incomingMouseClick =
   Signal.sampleOn Mouse.clicks Mouse.position
+
+incomingMouseClick_calibed : Signal (Int, Int)
+incomingMouseClick_calibed =
+  (\(x, y) -> (x - mouse_calib_x, mouse_calib_y - y)) <~ incomingMouseClick
 
 clock : Signal Time
 clock =
@@ -24,7 +29,7 @@ clock =
 
 cellClick_live : Signal Game.CellCoord
 cellClick_live =
-  Signal.filterMap Game.mousePosToCellCoord (Game.CellCoord (0, 0)) mouseClick_live
+  Signal.filterMap Game.mousePosToCellCoord (Game.CellCoord (0, 0)) incomingMouseClick_calibed
 
 game_live : Signal Game.Model
 game_live =
@@ -50,7 +55,7 @@ layout_live : Signal Element -> Signal Element -> Signal Element
 layout_live =
   Signal.map2 layout
 
-----
+--
 
 layout : Element -> Element -> Element
 layout e1 e2 =

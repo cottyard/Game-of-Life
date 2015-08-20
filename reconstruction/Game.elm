@@ -1,4 +1,5 @@
-module Game where
+module Game (init, draw, update, mousePosToCellCoord, 
+  Model, Update (CellClick, TimeUp), CellCoord (CellCoord)) where
 
 import Graphics.Collage exposing (Form, move)
 import Array exposing (Array)
@@ -73,14 +74,12 @@ zipWith_iter' f l1 l2 acc =
       Trampoline.Continue (\() -> zipWith_iter' f xs ys (f x y::acc))
 
 mousePosToCellCoord : (Int, Int) -> Maybe CellCoord
-mousePosToCellCoord (x_raw, y_raw) =
-  let x_calib = 50
-      y_calib = 765
-  in let x_coor = (x_raw - x_calib + Cell.size) // Cell.size - 1
-         y_coor = (y_calib - y_raw + Cell.size) // Cell.size - 1
-     in if | y_coor >= cell_count_h || y_coor < 0 ||
-             x_coor >= cell_count_w || x_coor < 0 -> Nothing
-           | otherwise -> Just (CellCoord (x_coor, y_coor))
+mousePosToCellCoord (x, y) =
+  let x_coor = (x + Cell.size) // Cell.size - 1
+      y_coor = (y + Cell.size) // Cell.size - 1
+  in if | y_coor >= cell_count_h || y_coor < 0 ||
+          x_coor >= cell_count_w || x_coor < 0 -> Nothing
+        | otherwise -> Just (CellCoord (x_coor, y_coor))
 
 -- update
 
