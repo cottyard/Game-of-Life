@@ -1870,7 +1870,6 @@ Elm.Game.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm),
    $Trampoline = Elm.Trampoline.make(_elm);
    var zipWith_iter$ = F4(function (f,
    l1,
@@ -1881,7 +1880,7 @@ Elm.Game.make = function (_elm) {
          {case "::": return function () {
                  var _raw = l2,
                  $ = _raw.ctor === "::" ? _raw : _U.badCase($moduleName,
-                 "on line 94, column 30 to 32"),
+                 "on line 93, column 30 to 32"),
                  y = $._0,
                  ys = $._1;
                  return $Trampoline.Continue(function (_v3) {
@@ -1896,14 +1895,14 @@ Elm.Game.make = function (_elm) {
                             A2(f,l1._0,y),
                             acc));}
                        _U.badCase($moduleName,
-                       "on line 95, column 35 to 68");
+                       "on line 94, column 35 to 68");
                     }();
                  });
               }();
             case "[]":
             return $Trampoline.Done(acc);}
          _U.badCase($moduleName,
-         "between lines 92 and 95");
+         "between lines 91 and 94");
       }();
    });
    var zipWith_iter = F3(function (f,
@@ -1923,7 +1922,7 @@ Elm.Game.make = function (_elm) {
          {case "::": return function () {
                  var _raw = l2,
                  $ = _raw.ctor === "::" ? _raw : _U.badCase($moduleName,
-                 "on line 84, column 30 to 32"),
+                 "on line 83, column 30 to 32"),
                  y = $._0,
                  ys = $._1;
                  return A2($List._op["::"],
@@ -1933,7 +1932,7 @@ Elm.Game.make = function (_elm) {
             case "[]":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 82 and 85");
+         "between lines 81 and 84");
       }();
    });
    var rangeIntList = F3(function (begin,
@@ -1957,7 +1956,7 @@ Elm.Game.make = function (_elm) {
                                           ,_0: $Basics.toFloat(_v8._0)
                                           ,_1: $Basics.toFloat(_v8._1)});}
          _U.badCase($moduleName,
-         "on line 67, column 3 to 29");
+         "on line 66, column 3 to 29");
       }();
    };
    var drawCells = function (model) {
@@ -1980,7 +1979,7 @@ Elm.Game.make = function (_elm) {
                        {case "Alive": return count + 1;
                           case "Dead": return count;}
                        _U.badCase($moduleName,
-                       "between lines 32 and 35");
+                       "between lines 31 and 34");
                     }();
                  });
                  return A3($List.foldl,
@@ -1991,7 +1990,7 @@ Elm.Game.make = function (_elm) {
                  _v12._0));
               }();}
          _U.badCase($moduleName,
-         "between lines 31 and 35");
+         "between lines 30 and 34");
       }();
    });
    var revertCell = F2(function (_v16,
@@ -2009,7 +2008,7 @@ Elm.Game.make = function (_elm) {
                  $Cell.reverse(cellModel));
               }();}
          _U.badCase($moduleName,
-         "between lines 26 and 27");
+         "between lines 25 and 26");
       }();
    });
    var cell_count_h = 50;
@@ -2050,9 +2049,7 @@ Elm.Game.make = function (_elm) {
       $List.concat(arrangementFuncs),
       $List.concat(drawCells(model)));
    };
-   var Clock = function (a) {
-      return {ctor: "Clock",_0: a};
-   };
+   var Clock = {ctor: "Clock"};
    var CellClick = function (a) {
       return {ctor: "CellClick"
              ,_0: a};
@@ -2081,11 +2078,11 @@ Elm.Game.make = function (_elm) {
                        case "Dead": return _U.eq(n,
                          3) ? $Cell.Alive : $Cell.Dead;}
                     _U.badCase($moduleName,
-                    "between lines 40 and 47");
+                    "between lines 39 and 46");
                  }();
               }();}
          _U.badCase($moduleName,
-         "between lines 39 and 47");
+         "between lines 38 and 46");
       }();
    });
    var evolve = function (model) {
@@ -2115,7 +2112,7 @@ Elm.Game.make = function (_elm) {
                                                                    ,_1: y_coor}));
               }();}
          _U.badCase($moduleName,
-         "between lines 99 and 103");
+         "between lines 98 and 102");
       }();
    };
    var update = F2(function (update,
@@ -2137,7 +2134,7 @@ Elm.Game.make = function (_elm) {
             case "Clock":
             return evolve(model);}
          _U.badCase($moduleName,
-         "between lines 109 and 111");
+         "between lines 108 and 110");
       }();
    });
    _elm.Game.values = {_op: _op
@@ -3572,17 +3569,12 @@ Elm.Main.make = function (_elm) {
    $Game = Elm.Game.make(_elm),
    $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $Keyboard = Elm.Keyboard.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm);
-   var toggleTimer = F2(function (spacePressed,
-   timerState) {
-      return spacePressed ? $Basics.not(timerState) : timerState;
-   });
+   $Timer = Elm.Timer.make(_elm);
    var calibrate = F2(function (offset,
    forms) {
       return A2($List.map,
@@ -3596,17 +3588,22 @@ Elm.Main.make = function (_elm) {
       _L.fromArray([e1,e2]));
    });
    var layout_live = $Signal.map2(layout);
+   var layoutMany_live = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "::":
+            return A3($List.foldl,
+              layout_live,
+              _v0._0,
+              _v0._1);}
+         _U.badCase($moduleName,
+         "on line 58, column 3 to 35");
+      }();
+   };
    var draw_live = $Signal.map($Game.draw);
-   var info_live = A2($Signal._op["<~"],
+   var mouseInfo_live = A2($Signal._op["<~"],
    $Graphics$Element.show,
    $Mouse.position);
-   var incomingToggleTimer = A3($Signal.foldp,
-   toggleTimer,
-   false,
-   $Keyboard.space);
-   var clock = A2($Time.fpsWhen,
-   1,
-   incomingToggleTimer);
    var incomingMouseClick = A2($Signal.sampleOn,
    $Mouse.clicks,
    $Mouse.position);
@@ -3616,15 +3613,15 @@ Elm.Main.make = function (_elm) {
    mouse_calib_x = $._0,
    mouse_calib_y = $._1;
    var incomingMouseClick_calibed = A2($Signal._op["<~"],
-   function (_v0) {
+   function (_v4) {
       return function () {
-         switch (_v0.ctor)
+         switch (_v4.ctor)
          {case "_Tuple2":
             return {ctor: "_Tuple2"
-                   ,_0: _v0._0 - mouse_calib_x
-                   ,_1: mouse_calib_y - _v0._1};}
+                   ,_0: _v4._0 - mouse_calib_x
+                   ,_1: mouse_calib_y - _v4._1};}
          _U.badCase($moduleName,
-         "on line 24, column 16 to 52");
+         "on line 25, column 16 to 52");
       }();
    },
    incomingMouseClick);
@@ -3639,8 +3636,12 @@ Elm.Main.make = function (_elm) {
    $Game.CellClick,
    cellClick_live),
    A2($Signal._op["<~"],
-   $Game.Clock,
-   clock));
+   function (_v8) {
+      return function () {
+         return $Game.Clock;
+      }();
+   },
+   $Timer.timeUp));
    var game_live = A3($Signal.foldp,
    $Game.update,
    $Game.init,
@@ -3661,9 +3662,11 @@ Elm.Main.make = function (_elm) {
       forms));
    };
    var scene_live = $Signal.map(scene);
-   var main = A2(layout_live,
-   scene_live(draw_live(game_live)),
-   info_live);
+   var main = layoutMany_live(_L.fromArray([A2($Signal._op["<~"],
+                                           $Graphics$Element.show,
+                                           $Timer.rawTimer)
+                                           ,mouseInfo_live
+                                           ,scene_live(draw_live(game_live))]));
    _elm.Main.values = {_op: _op
                       ,canvas_height: canvas_height
                       ,canvas_width: canvas_width
@@ -3672,19 +3675,17 @@ Elm.Main.make = function (_elm) {
                       ,main: main
                       ,incomingMouseClick: incomingMouseClick
                       ,incomingMouseClick_calibed: incomingMouseClick_calibed
-                      ,clock: clock
-                      ,incomingToggleTimer: incomingToggleTimer
                       ,cellClick_live: cellClick_live
                       ,game_live: game_live
-                      ,info_live: info_live
+                      ,mouseInfo_live: mouseInfo_live
                       ,incomingUpdate: incomingUpdate
                       ,scene_live: scene_live
                       ,draw_live: draw_live
                       ,layout_live: layout_live
+                      ,layoutMany_live: layoutMany_live
                       ,layout: layout
                       ,scene: scene
-                      ,calibrate: calibrate
-                      ,toggleTimer: toggleTimer};
+                      ,calibrate: calibrate};
    return _elm.Main.values;
 };
 Elm.Matrix = Elm.Matrix || {};
@@ -10876,6 +10877,126 @@ Elm.Time.make = function (_elm) {
                       ,delay: delay
                       ,since: since};
    return _elm.Time.values;
+};
+Elm.Timer = Elm.Timer || {};
+Elm.Timer.make = function (_elm) {
+   "use strict";
+   _elm.Timer = _elm.Timer || {};
+   if (_elm.Timer.values)
+   return _elm.Timer.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Timer",
+   $Basics = Elm.Basics.make(_elm),
+   $Keyboard = Elm.Keyboard.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var toggleTimer = F2(function (spacePressed,
+   timerState) {
+      return spacePressed ? $Basics.not(timerState) : timerState;
+   });
+   var incomingToggleTimer = A3($Signal.foldp,
+   toggleTimer,
+   false,
+   $Keyboard.space);
+   var clock = A2($Time.fpsWhen,
+   10,
+   incomingToggleTimer);
+   var whenPressed = A2($Signal.filterMap,
+   function (down) {
+      return down ? $Maybe.Just({ctor: "_Tuple0"}) : $Maybe.Nothing;
+   },
+   {ctor: "_Tuple0"});
+   var clockDec = whenPressed($Keyboard.isDown(189));
+   var clockAcc = whenPressed($Keyboard.isDown(187));
+   var update = F2(function (update,
+   model) {
+      return function () {
+         switch (update.ctor)
+         {case "Acc":
+            return _U.cmp(model.threshold,
+              0) > 0 ? _U.replace([["threshold"
+                                   ,model.threshold - 1]],
+              model) : model;
+            case "Clock":
+            return _U.cmp(model.count,
+              model.threshold) > -1 ? _U.replace([["count"
+                                                  ,0]],
+              model) : _U.replace([["count"
+                                   ,model.count + 1]],
+              model);
+            case "Dec":
+            return _U.replace([["threshold"
+                               ,model.threshold + 1]],
+              model);}
+         _U.badCase($moduleName,
+         "between lines 39 and 46");
+      }();
+   });
+   var trigger = function (_v1) {
+      return function () {
+         return _U.cmp(_v1.threshold,
+         _v1.count) < 1 ? $Maybe.Just({ctor: "_Tuple0"}) : $Maybe.Nothing;
+      }();
+   };
+   var init = {_: {}
+              ,count: 0
+              ,threshold: 10};
+   var Model = F2(function (a,b) {
+      return {_: {}
+             ,count: b
+             ,threshold: a};
+   });
+   var Clock = {ctor: "Clock"};
+   var Dec = {ctor: "Dec"};
+   var Acc = {ctor: "Acc"};
+   var incomingUpdate = $Signal.mergeMany(_L.fromArray([A2($Signal._op["<~"],
+                                                       function (_v3) {
+                                                          return function () {
+                                                             switch (_v3.ctor)
+                                                             {case "_Tuple0":
+                                                                return Acc;}
+                                                             _U.badCase($moduleName,
+                                                             "on line 50, column 30 to 33");
+                                                          }();
+                                                       },
+                                                       clockAcc)
+                                                       ,A2($Signal._op["<~"],
+                                                       function (_v5) {
+                                                          return function () {
+                                                             switch (_v5.ctor)
+                                                             {case "_Tuple0":
+                                                                return Dec;}
+                                                             _U.badCase($moduleName,
+                                                             "on line 51, column 30 to 33");
+                                                          }();
+                                                       },
+                                                       clockDec)
+                                                       ,A2($Signal._op["<~"],
+                                                       function (_v7) {
+                                                          return function () {
+                                                             return Clock;
+                                                          }();
+                                                       },
+                                                       clock)]));
+   var rawTimer = A3($Signal.foldp,
+   update,
+   init,
+   incomingUpdate);
+   var timer = A3($Signal.filterMap,
+   trigger,
+   {ctor: "_Tuple0"},
+   rawTimer);
+   var timeUp = timer;
+   _elm.Timer.values = {_op: _op
+                       ,timeUp: timeUp
+                       ,rawTimer: rawTimer};
+   return _elm.Timer.values;
 };
 Elm.Trampoline = Elm.Trampoline || {};
 Elm.Trampoline.make = function (_elm) {

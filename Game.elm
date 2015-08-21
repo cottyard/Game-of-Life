@@ -5,12 +5,11 @@ import Graphics.Collage exposing (Form, move)
 import Array exposing (Array)
 import Cell
 import Trampoline exposing (Trampoline, trampoline)
-import Time exposing (Time)
 import Matrix exposing (Matrix)
 
 type alias Model = Matrix Cell.Model
 type CellCoord = CellCoord (Int, Int)
-type Update = CellClick CellCoord | Clock Time
+type Update = CellClick CellCoord | Clock
 
 cell_count_w = 100
 cell_count_h = 50
@@ -108,4 +107,4 @@ update : Update -> Model -> Model
 update update model =
   case update of
     CellClick (CellCoord (x, y)) -> revertCell (CellCoord (x, y)) model
-    Clock _ -> evolve model
+    Clock -> evolve model

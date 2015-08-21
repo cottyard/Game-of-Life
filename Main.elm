@@ -2,16 +2,17 @@ import Game
 import Graphics.Element as GElem exposing (Element)
 import Graphics.Collage exposing (collage, Form, move)
 import Mouse
-import Time exposing (Time)
 import Signal exposing ((<~))
-import Keyboard
+import Timer
 
 (canvas_width, canvas_height) = (1600, 800)
 (mouse_calib_x, mouse_calib_y) = (50, 765)
 
 main : Signal Element
-main = layout_live (game_live |> draw_live |> scene_live) 
-                   info_live
+main = layoutMany_live [ (GElem.show <~ Timer.rawTimer)
+                       , mouseInfo_live
+                       , (game_live |> draw_live |> scene_live)
+                       ]
 
 -- signals
 
@@ -23,14 +24,6 @@ incomingMouseClick_calibed : Signal (Int, Int)
 incomingMouseClick_calibed =
   (\(x, y) -> (x - mouse_calib_x, mouse_calib_y - y)) <~ incomingMouseClick
 
-clock : Signal Time
-clock =
-  -- Signal.constant Time.second
-  Time.fpsWhen 1 incomingToggleTimer
-
-incomingToggleTimer : Signal Bool
-incomingToggleTimer =
-  Signal.foldp toggleTimer False Keyboard.space
 
 cellClick_live : Signal Game.CellCoord
 cellClick_live =
@@ -40,13 +33,13 @@ game_live : Signal Game.Model
 game_live =
   Signal.foldp Game.update Game.init incomingUpdate
 
-info_live : Signal Element
-info_live =
+mouseInfo_live : Signal Element
+mouseInfo_live =
   GElem.show <~ Mouse.position
 
 incomingUpdate : Signal Game.Update
 incomingUpdate =
-  Signal.merge (Game.CellClick <~ cellClick_live) (Game.Clock <~ clock)
+  Signal.merge (Game.CellClick <~ cellClick_live) ((\ _ -> Game.Clock) <~ Timer.timeUp)
 
 scene_live : Signal (List Form) -> Signal Element
 scene_live =
@@ -59,6 +52,10 @@ draw_live =
 layout_live : Signal Element -> Signal Element -> Signal Element
 layout_live =
   Signal.map2 layout
+
+layoutMany_live : List (Signal Element) -> Signal Element
+layoutMany_live (head::tail) =
+  List.foldl layout_live head tail
 
 --
 
@@ -74,7 +71,3 @@ scene forms =
 calibrate : (Float, Float) -> List Form -> List Form
 calibrate offset forms =
   List.map (move offset) forms
-
-toggleTimer : Bool -> Bool -> Bool
-toggleTimer spacePressed timerState =
-  if spacePressed then not timerState else timerState
