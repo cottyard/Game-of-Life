@@ -4,12 +4,14 @@ import Graphics.Collage exposing (collage, Form, move)
 import Signal exposing ((<~))
 import Timer
 import Input
+import Text
 
 (canvas_width, canvas_height) = (1600, 800)
 
 main : Signal Element
-main = layoutMany_live [ (GElem.show <~ Timer.rawTimer)
-                       , (game_live |> draw_live |> scene_live)
+main = layoutMany_live [ (GElem.show <~ Timer.indicator)
+                       , Signal.constant <| GElem.leftAligned <| Text.fromString "Speed: "
+                       , (Game.draw >> scene) <~ game_live
                        ]
 
 -- signals
@@ -22,21 +24,9 @@ incomingUpdate : Signal Game.Update
 incomingUpdate =
   Signal.merge (Game.CellClick <~ Input.cellClick_live) ((\ _ -> Game.Clock) <~ Timer.timeUp)
 
-scene_live : Signal (List Form) -> Signal Element
-scene_live =
-  Signal.map scene
-
-draw_live : Signal (Game.Model) -> Signal (List Form)
-draw_live =
-  Signal.map Game.draw
-
-layout_live : Signal Element -> Signal Element -> Signal Element
-layout_live =
-  Signal.map2 layout
-
 layoutMany_live : List (Signal Element) -> Signal Element
 layoutMany_live (head::tail) =
-  List.foldl layout_live head tail
+  List.foldl (Signal.map2 layout) head tail
 
 --
 

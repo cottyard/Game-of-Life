@@ -1,4 +1,4 @@
-module Timer (timeUp, rawTimer) where
+module Timer (timeUp, indicator) where
 
 import Signal exposing ((<~))
 import Time exposing (Time)
@@ -14,9 +14,11 @@ type alias Model =
   , count : Int
   }
 
+(thres_lower, thres_upper) = (0, 16)
+
 init : Model
 init = 
-  { threshold = 10
+  { threshold = 14
   , count = 0 
   }
 
@@ -25,6 +27,12 @@ init =
 timer : Signal ()
 timer =
   Signal.filterMap trigger () rawTimer
+
+indicator : Signal Int
+indicator =
+  let modelToSpeed model =
+    9 - model.threshold // 2
+  in modelToSpeed <~ rawTimer
 
 rawTimer : Signal Model
 rawTimer = 
@@ -37,10 +45,12 @@ trigger { threshold, count } =
 update : Update -> Model -> Model
 update update model =
   case update of
-    Acc -> if model.threshold > 0 
-           then { model | threshold <- model.threshold - 1 }
+    Acc -> if model.threshold > thres_lower
+           then { model | threshold <- model.threshold - 2 }
            else model
-    Dec -> { model | threshold <- model.threshold + 1 }
+    Dec -> if model.threshold < thres_upper
+           then { model | threshold <- model.threshold + 2 }
+           else model
     Clock -> if
       | model.count >= model.threshold -> { model | count <- 0 }
       | otherwise -> { model | count <- model.count + 1 }
