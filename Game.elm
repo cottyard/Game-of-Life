@@ -4,8 +4,8 @@ module Game (init, draw, update, pixelToCellCoord,
 import Graphics.Collage exposing (Form, move)
 import Array exposing (Array)
 import Cell
-import Trampoline exposing (Trampoline, trampoline)
 import Matrix exposing (Matrix)
+import Util
 
 type alias Model = Matrix Cell.Model
 type CellCoord = CellCoord (Int, Int)
@@ -53,9 +53,9 @@ evolve model =
 
 draw : Model -> List Form
 draw model = 
-  zipWith_iter (\f c -> f c)
-               (List.concat arrangementFuncs)
-               (List.concat <| drawCells model)
+  Util.zipWith_iter (\f c -> f c)
+                    (List.concat arrangementFuncs)
+                    (List.concat <| drawCells model)
 
 drawCells : Model -> List (List Form)
 drawCells model =
@@ -68,30 +68,8 @@ move_Int (x, y) =
 arrangementFuncs : List (List (Form -> Form))
 arrangementFuncs =
   let getColumnFuncs xPos =
-        List.map (move_Int << (,) xPos) (rangeIntList 0 Cell.size cell_count_h)
-  in List.map getColumnFuncs (rangeIntList 0 Cell.size cell_count_w)
-
-rangeIntList : Int -> Int -> Int -> List Int
-rangeIntList begin step size =
-  List.map ((*) step >> (+) begin) [0..size - 1]
-
--- Elm 0.15 doesn't support Tail Call Elimination; abandoning this function
-zipWith : (a -> b -> c) -> List a -> List b -> List c
-zipWith f l1 l2 =
-  case l1 of
-    []      -> []
-    (x::xs) -> let (y::ys) = l2 in
-      f x y :: zipWith f xs ys
-
-zipWith_iter : (a -> b -> c) -> List a -> List b -> List c
-zipWith_iter f l1 l2 = trampoline <| zipWith_iter' f l1 l2 []
-
-zipWith_iter' : (a -> b -> c) -> List a -> List b -> List c -> Trampoline (List c)
-zipWith_iter' f l1 l2 acc =
-  case l1 of
-    []      -> Trampoline.Done acc
-    (x::xs) -> let (y::ys) = l2 in
-      Trampoline.Continue (\() -> zipWith_iter' f xs ys (f x y::acc))
+        List.map (move_Int << (,) xPos) (Util.rangeIntList 0 Cell.size cell_count_h)
+  in List.map getColumnFuncs (Util.rangeIntList 0 Cell.size cell_count_w)
 
 pixelToCellCoord : (Int, Int) -> Maybe CellCoord
 pixelToCellCoord (x, y) =

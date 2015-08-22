@@ -1,45 +1,26 @@
 import Game
 import Graphics.Element as GElem exposing (Element)
 import Graphics.Collage exposing (collage, Form, move)
-import Mouse
 import Signal exposing ((<~))
 import Timer
+import Input
 
 (canvas_width, canvas_height) = (1600, 800)
-(mouse_calib_x, mouse_calib_y) = (50, 765)
 
 main : Signal Element
 main = layoutMany_live [ (GElem.show <~ Timer.rawTimer)
-                       , mouseInfo_live
                        , (game_live |> draw_live |> scene_live)
                        ]
 
 -- signals
 
-incomingMouseClick : Signal (Int, Int)
-incomingMouseClick =
-  Signal.sampleOn Mouse.clicks Mouse.position
-
-incomingMouseClick_calibed : Signal (Int, Int)
-incomingMouseClick_calibed =
-  (\(x, y) -> (x - mouse_calib_x, mouse_calib_y - y)) <~ incomingMouseClick
-
-
-cellClick_live : Signal Game.CellCoord
-cellClick_live =
-  Signal.filterMap Game.pixelToCellCoord (Game.CellCoord (0, 0)) incomingMouseClick_calibed
-
 game_live : Signal Game.Model
 game_live =
   Signal.foldp Game.update Game.init incomingUpdate
 
-mouseInfo_live : Signal Element
-mouseInfo_live =
-  GElem.show <~ Mouse.position
-
 incomingUpdate : Signal Game.Update
 incomingUpdate =
-  Signal.merge (Game.CellClick <~ cellClick_live) ((\ _ -> Game.Clock) <~ Timer.timeUp)
+  Signal.merge (Game.CellClick <~ Input.cellClick_live) ((\ _ -> Game.Clock) <~ Timer.timeUp)
 
 scene_live : Signal (List Form) -> Signal Element
 scene_live =
