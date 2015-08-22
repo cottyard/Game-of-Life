@@ -1,18 +1,22 @@
-module Game (init, draw, update, pixelToCellCoord, 
-  Model, Update (CellClick, Clock), CellCoord (CellCoord)) where
+module Game (init, view, update, pixelToCellCoord, Model, 
+  Update (Metabolism, Evolve), 
+  Metabolism (Mitosis, Apoptosis, CircleOfLife), 
+  CellCoord (CellCoord),
+  getCell) where --eliminate getCell!!
 
-import Graphics.Collage exposing (Form, move)
+import Graphics.Element as GElem exposing (Element)
+import Graphics.Collage as GColl exposing (Form)
 import Array exposing (Array)
 import Cell
 import Matrix exposing (Matrix)
 import Util
 
 type alias Model = Matrix Cell.Model
-type CellCoord = CellCoord (Int, Int)
-type Update = CellClick CellCoord | Clock
 
-cell_count_w = 100
-cell_count_h = 50
+type CellCoord = CellCoord (Int, Int)
+
+(canvas_width, canvas_height) = (1600, 800)
+(cell_count_w, cell_count_h) = (100, 50)
 
 -- model
 
@@ -20,23 +24,35 @@ init : Model
 init =
   Matrix.create (cell_count_w, cell_count_h) Cell.Dead
 
-revertCell : CellCoord -> Model -> Model
-revertCell (CellCoord coord) model =
-  let cellModel = Matrix.get model coord 
-  in Matrix.set model coord (Cell.reverse cellModel)
+revertCell : Model -> CellCoord -> Model
+revertCell model coord =
+  let cellModel = getCell model coord 
+  in setCell model coord (Cell.reverse cellModel)
+
+getCell : Model -> CellCoord -> Cell.Model
+getCell model (CellCoord coord) =
+  Matrix.get model coord
+
+setCell : Model -> CellCoord -> Cell.Model -> Matrix Cell.Model
+setCell model (CellCoord coord) cell =
+  Matrix.set model coord cell
+
+getCellNeighbours : Model -> CellCoord -> List Cell.Model
+getCellNeighbours model (CellCoord coord) =
+  Matrix.neighbours model coord
 
 aliveNeighbours : CellCoord -> Model -> Int
-aliveNeighbours (CellCoord coord) model =
+aliveNeighbours coord model =
   let countAlive cellModel count =
     case cellModel of
       Cell.Alive -> count + 1
       Cell.Dead -> count
-  in List.foldl countAlive 0 (Matrix.neighbours model coord)
+  in List.foldl countAlive 0 (getCellNeighbours model coord)
 
 evolveCell : CellCoord -> Model -> Cell.Model
-evolveCell (CellCoord coord) model =
-  let n = aliveNeighbours (CellCoord coord) model
-  in case Matrix.get model coord of
+evolveCell coord model =
+  let n = aliveNeighbours coord model
+  in case getCell model coord of
     Cell.Alive -> if
       | n < 2 -> Cell.Dead
       | n > 3 -> Cell.Dead
@@ -51,6 +67,19 @@ evolve model =
 
 -- view
 
+view : Model -> Element
+view =
+  scene << draw
+
+scene : List Form -> Element
+scene forms =
+  GColl.collage canvas_width canvas_height (
+    calibrate (-canvas_width / 2 + 50, -canvas_height / 2 + 50) forms)
+
+calibrate : (Float, Float) -> List Form -> List Form
+calibrate offset forms =
+  List.map (GColl.move offset) forms
+
 draw : Model -> List Form
 draw model = 
   Util.zipWith_iter (\f c -> f c)
@@ -63,7 +92,7 @@ drawCells model =
 
 move_Int : (Int, Int) -> Form -> Form
 move_Int (x, y) = 
-  move (toFloat x, toFloat y)
+  GColl.move (toFloat x, toFloat y)
 
 arrangementFuncs : List (List (Form -> Form))
 arrangementFuncs =
@@ -81,8 +110,18 @@ pixelToCellCoord (x, y) =
 
 -- update
 
+type Update = Metabolism Metabolism 
+            | Evolve
+
+type Metabolism = Mitosis CellCoord 
+                | Apoptosis CellCoord
+                | CircleOfLife CellCoord
+
 update : Update -> Model -> Model
 update update model =
   case update of
-    CellClick (CellCoord (x, y)) -> revertCell (CellCoord (x, y)) model
-    Clock -> evolve model
+    Metabolism m -> case m of
+      Mitosis coord -> setCell model coord Cell.Alive
+      Apoptosis coord -> setCell model coord Cell.Dead
+      CircleOfLife coord -> revertCell model coord
+    Evolve -> evolve model

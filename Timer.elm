@@ -1,8 +1,9 @@
-module Timer (timeUp, indicator) where
+module Timer (timeUp, indicator, incomingToggleTimer) where
 
 import Signal exposing ((<~))
 import Time exposing (Time)
 import Keyboard
+import Util
 
 timeUp : Signal ()
 timeUp =
@@ -18,7 +19,7 @@ type alias Model =
 
 init : Model
 init = 
-  { threshold = 14
+  { threshold = 4
   , count = 0 
   }
 
@@ -64,16 +65,11 @@ incomingUpdate =
 
 clockAcc : Signal ()
 clockAcc =
-  whenPressed (Keyboard.isDown 187)
+  Util.whenPressed (Keyboard.isDown 187)
 
 clockDec : Signal ()
 clockDec =
-  whenPressed (Keyboard.isDown 189)
-
-whenPressed : Signal Bool -> Signal ()
-whenPressed = 
-  Signal.filterMap (\down -> if down then (Just ()) else Nothing) ()
-  
+  Util.whenPressed (Keyboard.isDown 189)
 
 -- toggle
 

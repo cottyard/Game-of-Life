@@ -1,6 +1,7 @@
 module Util where
 
 import Trampoline exposing (Trampoline, trampoline)
+import Signal exposing (Signal)
 
 rangeIntList : Int -> Int -> Int -> List Int
 rangeIntList begin step size =
@@ -23,3 +24,11 @@ zipWith_iter' f l1 l2 acc =
     []      -> Trampoline.Done acc
     (x::xs) -> let (y::ys) = l2 in
       Trampoline.Continue (\() -> zipWith_iter' f xs ys (f x y::acc))
+
+whenPressed : Signal Bool -> Signal ()
+whenPressed = 
+  Signal.filterMap (\down -> if down then (Just ()) else Nothing) ()
+
+whenReleased : Signal Bool -> Signal ()
+whenReleased = 
+  Signal.filterMap (\down -> if not down then (Just ()) else Nothing) ()
