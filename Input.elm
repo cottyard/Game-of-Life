@@ -7,12 +7,14 @@ import Cell
 import Mouse
 import Signal exposing ((<~))
 import Util
+import Keyboard
 
 (mouse_calib_x, mouse_calib_y) = (50, 765)
 
 type Update = MouseDown Game.CellCoord
             | MouseUp Game.CellCoord
             | Hover Game.CellCoord
+            | NextStep
 
 type Model = Reviving
            | Killing
@@ -26,20 +28,15 @@ init =
 
 update : Update -> Model -> Game.Model -> Model
 update update model game =
-  case model of
-    Touching -> case update of
-      MouseDown coord -> case Game.getCell game coord of
+  case update of
+    MouseDown coord -> case model of
+      Touching -> case Game.getCell game coord of
         Cell.Dead -> Reviving
         Cell.Alive -> Killing
-      _ -> Touching
-
-    Reviving -> case update of
-      MouseUp _ -> Touching
-      _ -> Reviving
-
-    Killing -> case update of
-      MouseUp _ -> Touching
-      _ -> Killing
+      _ -> model
+    MouseUp _ -> Touching
+    Hover _ -> model
+    NextStep -> model
 
 updateGame : Update -> Model -> Game.Model -> Maybe Game.Update
 updateGame update model game =
@@ -55,14 +52,20 @@ updateGame update model game =
         Just <| Game.Metabolism (Game.Apoptosis coord)
       Touching ->
         Nothing
+    NextStep -> Just Game.Evolve
 
 updated : Signal Update
 updated =
   Signal.mergeMany [ 
-    (MouseDown <~ pressing),
-    (MouseUp <~ releasing),
-    (Hover <~ hovering)
+    MouseDown <~ pressing,
+    MouseUp <~ releasing,
+    Hover <~ hovering,
+    (\() -> NextStep) <~ manualStep
   ]
+
+manualStep : Signal ()
+manualStep =
+  Util.whenPressed (Keyboard.isDown 80)
 
 mouseDown : Signal ()
 mouseDown =

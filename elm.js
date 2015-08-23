@@ -3044,6 +3044,7 @@ Elm.Input.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Cell = Elm.Cell.make(_elm),
    $Game = Elm.Game.make(_elm),
+   $Keyboard = Elm.Keyboard.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),
@@ -3057,6 +3058,7 @@ Elm.Input.make = function (_elm) {
                    ,_1: -1}));
    var mouseUp = $Util.whenReleased($Mouse.isDown);
    var mouseDown = $Util.whenPressed($Mouse.isDown);
+   var manualStep = $Util.whenPressed($Keyboard.isDown(80));
    var updateGame = F3(function (update,
    model,
    game) {
@@ -3072,14 +3074,16 @@ Elm.Input.make = function (_elm) {
                     case "Touching":
                     return $Maybe.Nothing;}
                  _U.badCase($moduleName,
-                 "between lines 51 and 57");
+                 "between lines 48 and 55");
               }();
             case "MouseDown":
             return $Maybe.Just($Game.Metabolism($Game.CircleOfLife(update._0)));
             case "MouseUp":
-            return $Maybe.Nothing;}
+            return $Maybe.Nothing;
+            case "NextStep":
+            return $Maybe.Just($Game.Evolve);}
          _U.badCase($moduleName,
-         "between lines 46 and 57");
+         "between lines 43 and 55");
       }();
    });
    var Touching = {ctor: "Touching"};
@@ -3090,41 +3094,31 @@ Elm.Input.make = function (_elm) {
    model,
    game) {
       return function () {
-         switch (model.ctor)
-         {case "Killing":
+         switch (update.ctor)
+         {case "Hover": return model;
+            case "MouseDown":
             return function () {
-                 switch (update.ctor)
-                 {case "MouseUp":
-                    return Touching;}
-                 return Killing;
-              }();
-            case "Reviving":
-            return function () {
-                 switch (update.ctor)
-                 {case "MouseUp":
-                    return Touching;}
-                 return Reviving;
-              }();
-            case "Touching":
-            return function () {
-                 switch (update.ctor)
-                 {case "MouseDown":
+                 switch (model.ctor)
+                 {case "Touching":
                     return function () {
-                         var _v12 = A2($Game.getCell,
+                         var _v10 = A2($Game.getCell,
                          game,
                          update._0);
-                         switch (_v12.ctor)
+                         switch (_v10.ctor)
                          {case "Alive": return Killing;
                             case "Dead": return Reviving;}
                          _U.badCase($moduleName,
-                         "between lines 31 and 34");
+                         "between lines 33 and 36");
                       }();}
-                 return Touching;
-              }();}
+                 return model;
+              }();
+            case "MouseUp": return Touching;
+            case "NextStep": return model;}
          _U.badCase($moduleName,
-         "between lines 29 and 42");
+         "between lines 31 and 39");
       }();
    });
+   var NextStep = {ctor: "NextStep"};
    var Hover = function (a) {
       return {ctor: "Hover",_0: a};
    };
@@ -3142,15 +3136,15 @@ Elm.Input.make = function (_elm) {
    mouse_calib_x = $._0,
    mouse_calib_y = $._1;
    var mousePosCalibed = A2($Signal._op["<~"],
-   function (_v13) {
+   function (_v11) {
       return function () {
-         switch (_v13.ctor)
+         switch (_v11.ctor)
          {case "_Tuple2":
             return {ctor: "_Tuple2"
-                   ,_0: _v13._0 - mouse_calib_x
-                   ,_1: mouse_calib_y - _v13._1};}
+                   ,_0: _v11._0 - mouse_calib_x
+                   ,_1: mouse_calib_y - _v11._1};}
          _U.badCase($moduleName,
-         "on line 85, column 16 to 52");
+         "on line 88, column 16 to 52");
       }();
    },
    $Mouse.position);
@@ -3170,7 +3164,18 @@ Elm.Input.make = function (_elm) {
                                                 releasing)
                                                 ,A2($Signal._op["<~"],
                                                 Hover,
-                                                hovering)]));
+                                                hovering)
+                                                ,A2($Signal._op["<~"],
+                                                function (_v15) {
+                                                   return function () {
+                                                      switch (_v15.ctor)
+                                                      {case "_Tuple0":
+                                                         return NextStep;}
+                                                      _U.badCase($moduleName,
+                                                      "on line 63, column 13 to 21");
+                                                   }();
+                                                },
+                                                manualStep)]));
    _elm.Input.values = {_op: _op
                        ,init: init
                        ,update: update
@@ -11026,7 +11031,6 @@ Elm.Timer.make = function (_elm) {
    $Util = Elm.Util.make(_elm);
    var clockDec = $Util.whenPressed($Keyboard.isDown(189));
    var clockAcc = $Util.whenPressed($Keyboard.isDown(187));
-   var manualClock = $Util.whenPressed($Keyboard.isDown(80));
    var toggleTimer = F2(function (spacePressed,
    timerState) {
       return spacePressed ? $Basics.not(timerState) : timerState;
@@ -11081,7 +11085,7 @@ Elm.Timer.make = function (_elm) {
                                                 ,model.threshold + 2]],
                  model) : model;}
             _U.badCase($moduleName,
-            "between lines 53 and 62");
+            "between lines 54 and 63");
          }();
       }();
    });
@@ -11103,7 +11107,7 @@ Elm.Timer.make = function (_elm) {
                                                              {case "_Tuple0":
                                                                 return Acc;}
                                                              _U.badCase($moduleName,
-                                                             "on line 66, column 30 to 33");
+                                                             "on line 67, column 30 to 33");
                                                           }();
                                                        },
                                                        clockAcc)
@@ -11114,7 +11118,7 @@ Elm.Timer.make = function (_elm) {
                                                              {case "_Tuple0":
                                                                 return Dec;}
                                                              _U.badCase($moduleName,
-                                                             "on line 67, column 30 to 33");
+                                                             "on line 68, column 30 to 33");
                                                           }();
                                                        },
                                                        clockDec)
@@ -11124,14 +11128,7 @@ Elm.Timer.make = function (_elm) {
                                                              return Clock;
                                                           }();
                                                        },
-                                                       clock)
-                                                       ,A2($Signal._op["<~"],
-                                                       function (_v9) {
-                                                          return function () {
-                                                             return Clock;
-                                                          }();
-                                                       },
-                                                       manualClock)]));
+                                                       clock)]));
    var rawTimer = A3($Signal.foldp,
    update,
    init,

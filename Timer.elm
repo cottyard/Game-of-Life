@@ -10,6 +10,7 @@ timeUp =
   timer
 
 type Update = Acc | Dec | Clock
+
 type alias Model = 
   { threshold : Int
   , count : Int
@@ -66,7 +67,6 @@ incomingUpdate =
   Signal.mergeMany [ (\() -> Acc) <~ clockAcc
                    , (\() -> Dec) <~ clockDec
                    , (\_ -> Clock) <~ clock
-                   , (\_ -> Clock) <~ manualClock
                    ]
 
 -- toggle
@@ -80,10 +80,6 @@ incomingToggleTimer =
   Signal.foldp toggleTimer False Keyboard.space
 
 -- signal source
-
-manualClock : Signal ()
-manualClock =
-  Util.whenPressed (Keyboard.isDown 80)
 
 clockAcc : Signal ()
 clockAcc =
