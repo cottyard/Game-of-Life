@@ -2,7 +2,7 @@ module Game (init, view, update, pixelToCellCoord, Model,
   Update (Metabolism, Evolve), 
   Metabolism (Mitosis, Apoptosis, CircleOfLife), 
   CellCoord (CellCoord),
-  getCell) where --eliminate getCell!!
+  getCell) where
 
 import Graphics.Element as GElem exposing (Element)
 import Graphics.Collage as GColl exposing (Form)
@@ -82,9 +82,9 @@ calibrate offset forms =
 
 draw : Model -> List Form
 draw model = 
-  Util.zipWith_iter (\f c -> f c)
-                    (List.concat arrangementFuncs)
-                    (List.concat <| drawCells model)
+  List.map2 (\f c -> f c)
+            (List.concat arrangementFuncs)
+            (List.concat <| drawCells model)
 
 drawCells : Model -> List (List Form)
 drawCells model =
@@ -96,9 +96,9 @@ move_Int (x, y) =
 
 arrangementFuncs : List (List (Form -> Form))
 arrangementFuncs =
-  let getColumnFuncs xPos =
+  let forEachColumn xPos =
         List.map (move_Int << (,) xPos) (Util.rangeIntList 0 Cell.size cell_count_h)
-  in List.map getColumnFuncs (Util.rangeIntList 0 Cell.size cell_count_w)
+  in List.map forEachColumn (Util.rangeIntList 0 Cell.size cell_count_w)
 
 pixelToCellCoord : (Int, Int) -> Maybe CellCoord
 pixelToCellCoord (x, y) =

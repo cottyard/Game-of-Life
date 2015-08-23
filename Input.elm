@@ -1,6 +1,5 @@
 module Input (Update (MouseDown, MouseUp, Hover),
-  Model (Reviving, Killing, Touching),
-  init, update, updated) where -- eliminate Model constructors!!
+  Model, init, update, updateGame, updated) where
 
 import Graphics.Element as GElem exposing (Element)
 import Game
@@ -42,6 +41,20 @@ update update model game =
       MouseUp _ -> Touching
       _ -> Killing
 
+updateGame : Update -> Model -> Game.Model -> Maybe Game.Update
+updateGame update model game =
+  case update of
+    MouseDown coord ->
+      Just <| Game.Metabolism (Game.CircleOfLife coord)
+    MouseUp coord ->
+      Nothing
+    Hover coord -> case model of
+      Reviving ->
+        Just <| Game.Metabolism (Game.Mitosis coord)
+      Killing ->
+        Just <| Game.Metabolism (Game.Apoptosis coord)
+      Touching ->
+        Nothing
 
 updated : Signal Update
 updated =

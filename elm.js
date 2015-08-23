@@ -2016,7 +2016,7 @@ Elm.Game.make = function (_elm) {
    ,_1: cell_count_h},
    $Cell.Dead);
    var arrangementFuncs = function () {
-      var getColumnFuncs = function (xPos) {
+      var forEachColumn = function (xPos) {
          return A2($List.map,
          function ($) {
             return move_Int(F2(function (v0,
@@ -2032,14 +2032,14 @@ Elm.Game.make = function (_elm) {
          cell_count_h));
       };
       return A2($List.map,
-      getColumnFuncs,
+      forEachColumn,
       A3($Util.rangeIntList,
       0,
       $Cell.size,
       cell_count_w));
    }();
    var draw = function (model) {
-      return A3($Util.zipWith_iter,
+      return A3($List.map2,
       F2(function (f,c) {
          return f(c);
       }),
@@ -3057,6 +3057,31 @@ Elm.Input.make = function (_elm) {
                    ,_1: -1}));
    var mouseUp = $Util.whenReleased($Mouse.isDown);
    var mouseDown = $Util.whenPressed($Mouse.isDown);
+   var updateGame = F3(function (update,
+   model,
+   game) {
+      return function () {
+         switch (update.ctor)
+         {case "Hover":
+            return function () {
+                 switch (model.ctor)
+                 {case "Killing":
+                    return $Maybe.Just($Game.Metabolism($Game.Apoptosis(update._0)));
+                    case "Reviving":
+                    return $Maybe.Just($Game.Metabolism($Game.Mitosis(update._0)));
+                    case "Touching":
+                    return $Maybe.Nothing;}
+                 _U.badCase($moduleName,
+                 "between lines 51 and 57");
+              }();
+            case "MouseDown":
+            return $Maybe.Just($Game.Metabolism($Game.CircleOfLife(update._0)));
+            case "MouseUp":
+            return $Maybe.Nothing;}
+         _U.badCase($moduleName,
+         "between lines 46 and 57");
+      }();
+   });
    var Touching = {ctor: "Touching"};
    var init = Touching;
    var Killing = {ctor: "Killing"};
@@ -3085,19 +3110,19 @@ Elm.Input.make = function (_elm) {
                  switch (update.ctor)
                  {case "MouseDown":
                     return function () {
-                         var _v7 = A2($Game.getCell,
+                         var _v12 = A2($Game.getCell,
                          game,
                          update._0);
-                         switch (_v7.ctor)
+                         switch (_v12.ctor)
                          {case "Alive": return Killing;
                             case "Dead": return Reviving;}
                          _U.badCase($moduleName,
-                         "between lines 32 and 35");
+                         "between lines 31 and 34");
                       }();}
                  return Touching;
               }();}
          _U.badCase($moduleName,
-         "between lines 30 and 43");
+         "between lines 29 and 42");
       }();
    });
    var Hover = function (a) {
@@ -3117,15 +3142,15 @@ Elm.Input.make = function (_elm) {
    mouse_calib_x = $._0,
    mouse_calib_y = $._1;
    var mousePosCalibed = A2($Signal._op["<~"],
-   function (_v8) {
+   function (_v13) {
       return function () {
-         switch (_v8.ctor)
+         switch (_v13.ctor)
          {case "_Tuple2":
             return {ctor: "_Tuple2"
-                   ,_0: _v8._0 - mouse_calib_x
-                   ,_1: mouse_calib_y - _v8._1};}
+                   ,_0: _v13._0 - mouse_calib_x
+                   ,_1: mouse_calib_y - _v13._1};}
          _U.badCase($moduleName,
-         "on line 72, column 16 to 52");
+         "on line 85, column 16 to 52");
       }();
    },
    $Mouse.position);
@@ -3149,13 +3174,11 @@ Elm.Input.make = function (_elm) {
    _elm.Input.values = {_op: _op
                        ,init: init
                        ,update: update
+                       ,updateGame: updateGame
                        ,updated: updated
                        ,MouseDown: MouseDown
                        ,MouseUp: MouseUp
-                       ,Hover: Hover
-                       ,Reviving: Reviving
-                       ,Killing: Killing
-                       ,Touching: Touching};
+                       ,Hover: Hover};
    return _elm.Input.values;
 };
 Elm.Keyboard = Elm.Keyboard || {};
@@ -3713,7 +3736,7 @@ Elm.Main.make = function (_elm) {
               _v0._0,
               _v0._1);}
          _U.badCase($moduleName,
-         "on line 62, column 3 to 44");
+         "on line 54, column 3 to 44");
       }();
    };
    var view = function (_v4) {
@@ -3722,7 +3745,7 @@ Elm.Main.make = function (_elm) {
          {case "GlobalState":
             return $Game.view(_v4._1);}
          _U.badCase($moduleName,
-         "on line 52, column 3 to 18");
+         "on line 44, column 3 to 18");
       }();
    };
    var Clock = {ctor: "Clock"};
@@ -3737,7 +3760,7 @@ Elm.Main.make = function (_elm) {
          switch (_v8.ctor)
          {case "_Tuple0": return Clock;}
          _U.badCase($moduleName,
-         "on line 46, column 25 to 30");
+         "on line 38, column 25 to 30");
       }();
    },
    $Timer.timeUp),
@@ -3765,31 +3788,19 @@ Elm.Main.make = function (_elm) {
                       _v10._1));
                     case "UserInput":
                     return function () {
+                         var gameUpdate = A3($Input.updateGame,
+                         update._0,
+                         _v10._0,
+                         _v10._1);
                          var nextGameM = function () {
-                            switch (update._0.ctor)
-                            {case "Hover":
-                               return function () {
-                                    switch (_v10._0.ctor)
-                                    {case "Killing":
-                                       return A2($Game.update,
-                                         $Game.Metabolism($Game.Apoptosis(update._0._0)),
-                                         _v10._1);
-                                       case "Reviving":
-                                       return A2($Game.update,
-                                         $Game.Metabolism($Game.Mitosis(update._0._0)),
-                                         _v10._1);
-                                       case "Touching":
-                                       return _v10._1;}
-                                    _U.badCase($moduleName,
-                                    "between lines 35 and 42");
-                                 }();
-                               case "MouseDown":
+                            switch (gameUpdate.ctor)
+                            {case "Just":
                                return A2($Game.update,
-                                 $Game.Metabolism($Game.CircleOfLife(update._0._0)),
+                                 gameUpdate._0,
                                  _v10._1);
-                               case "MouseUp": return _v10._1;}
+                               case "Nothing": return _v10._1;}
                             _U.badCase($moduleName,
-                            "between lines 30 and 42");
+                            "between lines 31 and 34");
                          }();
                          var nextInputM = A3($Input.update,
                          update._0,
@@ -3800,10 +3811,10 @@ Elm.Main.make = function (_elm) {
                          nextGameM);
                       }();}
                  _U.badCase($moduleName,
-                 "between lines 25 and 42");
+                 "between lines 25 and 34");
               }();}
          _U.badCase($moduleName,
-         "between lines 25 and 42");
+         "between lines 25 and 34");
       }();
    });
    var state = A3($Signal.foldp,
@@ -9534,38 +9545,6 @@ Elm.Native.Time.make = function(localRuntime)
 
 };
 
-Elm.Native.Trampoline = {};
-Elm.Native.Trampoline.make = function(localRuntime) {
-
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Trampoline = localRuntime.Native.Trampoline || {};
-	if (localRuntime.Native.Trampoline.values)
-	{
-		return localRuntime.Native.Trampoline.values;
-	}
-
-	// trampoline : Trampoline a -> a
-	function trampoline(t)
-	{
-		var tramp = t;
-		while(true)
-		{
-			switch(tramp.ctor)
-			{
-				case "Done":
-					return tramp._0;
-				case "Continue":
-					tramp = tramp._0({ ctor: "_Tuple0" });
-					continue;
-			}
-		}
-	}
-
-	return localRuntime.Native.Trampoline.values = {
-		trampoline: trampoline
-	};
-};
-
 Elm.Native.Transform2D = {};
 Elm.Native.Transform2D.make = function(localRuntime) {
 
@@ -11157,32 +11136,6 @@ Elm.Timer.make = function (_elm) {
                        ,incomingToggleTimer: incomingToggleTimer};
    return _elm.Timer.values;
 };
-Elm.Trampoline = Elm.Trampoline || {};
-Elm.Trampoline.make = function (_elm) {
-   "use strict";
-   _elm.Trampoline = _elm.Trampoline || {};
-   if (_elm.Trampoline.values)
-   return _elm.Trampoline.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Trampoline",
-   $Native$Trampoline = Elm.Native.Trampoline.make(_elm);
-   var trampoline = $Native$Trampoline.trampoline;
-   var Continue = function (a) {
-      return {ctor: "Continue"
-             ,_0: a};
-   };
-   var Done = function (a) {
-      return {ctor: "Done",_0: a};
-   };
-   _elm.Trampoline.values = {_op: _op
-                            ,trampoline: trampoline
-                            ,Done: Done
-                            ,Continue: Continue};
-   return _elm.Trampoline.values;
-};
 Elm.Transform2D = Elm.Transform2D || {};
 Elm.Transform2D.make = function (_elm) {
    "use strict";
@@ -11263,8 +11216,7 @@ Elm.Util.make = function (_elm) {
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Trampoline = Elm.Trampoline.make(_elm);
+   $Signal = Elm.Signal.make(_elm);
    var whenReleased = A2($Signal.filterMap,
    function (down) {
       return $Basics.not(down) ? $Maybe.Just({ctor: "_Tuple0"}) : $Maybe.Nothing;
@@ -11275,70 +11227,6 @@ Elm.Util.make = function (_elm) {
       return down ? $Maybe.Just({ctor: "_Tuple0"}) : $Maybe.Nothing;
    },
    {ctor: "_Tuple0"});
-   var zipWith_iter$ = F4(function (f,
-   l1,
-   l2,
-   acc) {
-      return function () {
-         switch (l1.ctor)
-         {case "::": return function () {
-                 var _raw = l2,
-                 $ = _raw.ctor === "::" ? _raw : _U.badCase($moduleName,
-                 "on line 25, column 30 to 32"),
-                 y = $._0,
-                 ys = $._1;
-                 return $Trampoline.Continue(function (_v3) {
-                    return function () {
-                       switch (_v3.ctor)
-                       {case "_Tuple0":
-                          return A4(zipWith_iter$,
-                            f,
-                            l1._1,
-                            ys,
-                            A2($List._op["::"],
-                            A2(f,l1._0,y),
-                            acc));}
-                       _U.badCase($moduleName,
-                       "on line 26, column 35 to 68");
-                    }();
-                 });
-              }();
-            case "[]":
-            return $Trampoline.Done(acc);}
-         _U.badCase($moduleName,
-         "between lines 23 and 26");
-      }();
-   });
-   var zipWith_iter = F3(function (f,
-   l1,
-   l2) {
-      return $Trampoline.trampoline(A4(zipWith_iter$,
-      f,
-      l1,
-      l2,
-      _L.fromArray([])));
-   });
-   var zipWith = F3(function (f,
-   l1,
-   l2) {
-      return function () {
-         switch (l1.ctor)
-         {case "::": return function () {
-                 var _raw = l2,
-                 $ = _raw.ctor === "::" ? _raw : _U.badCase($moduleName,
-                 "on line 15, column 30 to 32"),
-                 y = $._0,
-                 ys = $._1;
-                 return A2($List._op["::"],
-                 A2(f,l1._0,y),
-                 A3(zipWith,f,l1._1,ys));
-              }();
-            case "[]":
-            return _L.fromArray([]);}
-         _U.badCase($moduleName,
-         "between lines 13 and 16");
-      }();
-   });
    var rangeIntList = F3(function (begin,
    step,
    size) {
@@ -11354,9 +11242,6 @@ Elm.Util.make = function (_elm) {
    });
    _elm.Util.values = {_op: _op
                       ,rangeIntList: rangeIntList
-                      ,zipWith: zipWith
-                      ,zipWith_iter: zipWith_iter
-                      ,zipWith_iter$: zipWith_iter$
                       ,whenPressed: whenPressed
                       ,whenReleased: whenReleased};
    return _elm.Util.values;

@@ -27,18 +27,10 @@ update update (GlobalState inputM gameM) =
       GlobalState inputM (Game.update Game.Evolve gameM)
     UserInput inputU -> 
       let nextInputM = Input.update inputU inputM gameM
-          nextGameM = case inputU of
-            Input.MouseDown coord ->
-              Game.update (Game.Metabolism (Game.CircleOfLife coord)) gameM
-            Input.MouseUp coord ->
-              gameM
-            Input.Hover coord -> case inputM of
-              Input.Reviving ->
-                Game.update (Game.Metabolism (Game.Mitosis coord)) gameM
-              Input.Killing ->
-                Game.update (Game.Metabolism (Game.Apoptosis coord)) gameM
-              Input.Touching ->
-                gameM
+          gameUpdate = Input.updateGame inputU inputM gameM
+          nextGameM = case gameUpdate of
+            Just upd -> Game.update upd gameM
+            Nothing -> gameM
       in GlobalState nextInputM nextGameM
 
 updated : Signal Update
