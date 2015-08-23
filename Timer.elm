@@ -13,6 +13,7 @@ type Update = Acc | Dec | Clock
 type alias Model = 
   { threshold : Int
   , count : Int
+  , clockTriggered : Bool
   }
 
 (thres_lower, thres_upper) = (0, 16)
@@ -20,7 +21,8 @@ type alias Model =
 init : Model
 init = 
   { threshold = 4
-  , count = 0 
+  , count = 0
+  , clockTriggered = False
   }
 
 -- frequency
@@ -40,36 +42,32 @@ rawTimer =
   Signal.foldp update init incomingUpdate
 
 trigger : Model -> Maybe ()
-trigger { threshold, count } =
-  if threshold <= count then (Just ()) else Nothing
+trigger { threshold, count, clockTriggered } =
+  if clockTriggered
+    then if threshold <= count then (Just ()) else Nothing
+    else Nothing
 
 update : Update -> Model -> Model
-update update model =
-  case update of
+update update mdl =
+  let model = { mdl | clockTriggered <- False }
+  in case update of
     Acc -> if model.threshold > thres_lower
            then { model | threshold <- model.threshold - 2 }
            else model
     Dec -> if model.threshold < thres_upper
            then { model | threshold <- model.threshold + 2 }
            else model
-    Clock -> if
-      | model.count >= model.threshold -> { model | count <- 0 }
-      | otherwise -> { model | count <- model.count + 1 }
+    Clock -> if model.count >= model.threshold
+             then { model | count <- 0, clockTriggered <- True }
+             else { model | count <- model.count + 1, clockTriggered <- True }
 
 incomingUpdate : Signal Update
 incomingUpdate =
   Signal.mergeMany [ (\() -> Acc) <~ clockAcc
                    , (\() -> Dec) <~ clockDec
                    , (\_ -> Clock) <~ clock
+                   , (\_ -> Clock) <~ manualClock
                    ]
-
-clockAcc : Signal ()
-clockAcc =
-  Util.whenPressed (Keyboard.isDown 187)
-
-clockDec : Signal ()
-clockDec =
-  Util.whenPressed (Keyboard.isDown 189)
 
 -- toggle
 
@@ -82,6 +80,18 @@ incomingToggleTimer =
   Signal.foldp toggleTimer False Keyboard.space
 
 -- signal source
+
+manualClock : Signal ()
+manualClock =
+  Util.whenPressed (Keyboard.isDown 80)
+
+clockAcc : Signal ()
+clockAcc =
+  Util.whenPressed (Keyboard.isDown 187)
+
+clockDec : Signal ()
+clockDec =
+  Util.whenPressed (Keyboard.isDown 189)
 
 clock : Signal Time
 clock =

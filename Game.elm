@@ -11,14 +11,14 @@ import Cell
 import Matrix exposing (Matrix)
 import Util
 
-type alias Model = Matrix Cell.Model
-
-type CellCoord = CellCoord (Int, Int)
-
 (canvas_width, canvas_height) = (1600, 800)
 (cell_count_w, cell_count_h) = (100, 50)
 
 -- model
+
+type alias Model = Matrix Cell.Model
+
+type CellCoord = CellCoord (Int, Int)
 
 init : Model
 init =

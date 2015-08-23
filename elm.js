@@ -2005,65 +2005,6 @@ Elm.Game.make = function (_elm) {
          $Cell.reverse(cellModel));
       }();
    });
-   var $ = {ctor: "_Tuple2"
-           ,_0: 100
-           ,_1: 50},
-   cell_count_w = $._0,
-   cell_count_h = $._1;
-   var init = A2($Matrix.create,
-   {ctor: "_Tuple2"
-   ,_0: cell_count_w
-   ,_1: cell_count_h},
-   $Cell.Dead);
-   var arrangementFuncs = function () {
-      var forEachColumn = function (xPos) {
-         return A2($List.map,
-         function ($) {
-            return move_Int(F2(function (v0,
-            v1) {
-               return {ctor: "_Tuple2"
-                      ,_0: v0
-                      ,_1: v1};
-            })(xPos)($));
-         },
-         A3($Util.rangeIntList,
-         0,
-         $Cell.size,
-         cell_count_h));
-      };
-      return A2($List.map,
-      forEachColumn,
-      A3($Util.rangeIntList,
-      0,
-      $Cell.size,
-      cell_count_w));
-   }();
-   var draw = function (model) {
-      return A3($List.map2,
-      F2(function (f,c) {
-         return f(c);
-      }),
-      $List.concat(arrangementFuncs),
-      $List.concat(drawCells(model)));
-   };
-   var $ = {ctor: "_Tuple2"
-           ,_0: 1600
-           ,_1: 800},
-   canvas_width = $._0,
-   canvas_height = $._1;
-   var scene = function (forms) {
-      return A3($Graphics$Collage.collage,
-      canvas_width,
-      canvas_height,
-      A2(calibrate,
-      {ctor: "_Tuple2"
-      ,_0: (0 - canvas_width) / 2 + 50
-      ,_1: (0 - canvas_height) / 2 + 50},
-      forms));
-   };
-   var view = function ($) {
-      return scene(draw($));
-   };
    var CellCoord = function (a) {
       return {ctor: "CellCoord"
              ,_0: a};
@@ -2109,6 +2050,47 @@ Elm.Game.make = function (_elm) {
          "between lines 122 and 127");
       }();
    });
+   var $ = {ctor: "_Tuple2"
+           ,_0: 100
+           ,_1: 50},
+   cell_count_w = $._0,
+   cell_count_h = $._1;
+   var init = A2($Matrix.create,
+   {ctor: "_Tuple2"
+   ,_0: cell_count_w
+   ,_1: cell_count_h},
+   $Cell.Dead);
+   var arrangementFuncs = function () {
+      var forEachColumn = function (xPos) {
+         return A2($List.map,
+         function ($) {
+            return move_Int(F2(function (v0,
+            v1) {
+               return {ctor: "_Tuple2"
+                      ,_0: v0
+                      ,_1: v1};
+            })(xPos)($));
+         },
+         A3($Util.rangeIntList,
+         0,
+         $Cell.size,
+         cell_count_h));
+      };
+      return A2($List.map,
+      forEachColumn,
+      A3($Util.rangeIntList,
+      0,
+      $Cell.size,
+      cell_count_w));
+   }();
+   var draw = function (model) {
+      return A3($List.map2,
+      F2(function (f,c) {
+         return f(c);
+      }),
+      $List.concat(arrangementFuncs),
+      $List.concat(drawCells(model)));
+   };
    var pixelToCellCoord = function (_v23) {
       return function () {
          switch (_v23.ctor)
@@ -2127,6 +2109,24 @@ Elm.Game.make = function (_elm) {
          _U.badCase($moduleName,
          "between lines 105 and 109");
       }();
+   };
+   var $ = {ctor: "_Tuple2"
+           ,_0: 1600
+           ,_1: 800},
+   canvas_width = $._0,
+   canvas_height = $._1;
+   var scene = function (forms) {
+      return A3($Graphics$Collage.collage,
+      canvas_width,
+      canvas_height,
+      A2(calibrate,
+      {ctor: "_Tuple2"
+      ,_0: (0 - canvas_width) / 2 + 50
+      ,_1: (0 - canvas_height) / 2 + 50},
+      forms));
+   };
+   var view = function ($) {
+      return scene(draw($));
    };
    _elm.Game.values = {_op: _op
                       ,init: init
@@ -3736,7 +3736,7 @@ Elm.Main.make = function (_elm) {
               _v0._0,
               _v0._1);}
          _U.badCase($moduleName,
-         "on line 54, column 3 to 44");
+         "on line 52, column 3 to 44");
       }();
    };
    var view = function (_v4) {
@@ -3745,7 +3745,7 @@ Elm.Main.make = function (_elm) {
          {case "GlobalState":
             return $Game.view(_v4._1);}
          _U.badCase($moduleName,
-         "on line 44, column 3 to 18");
+         "on line 43, column 3 to 18");
       }();
    };
    var Clock = {ctor: "Clock"};
@@ -11024,6 +11024,9 @@ Elm.Timer.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Time = Elm.Time.make(_elm),
    $Util = Elm.Util.make(_elm);
+   var clockDec = $Util.whenPressed($Keyboard.isDown(189));
+   var clockAcc = $Util.whenPressed($Keyboard.isDown(187));
+   var manualClock = $Util.whenPressed($Keyboard.isDown(80));
    var toggleTimer = F2(function (spacePressed,
    timerState) {
       return spacePressed ? $Basics.not(timerState) : timerState;
@@ -11035,15 +11038,14 @@ Elm.Timer.make = function (_elm) {
    var clock = A2($Time.fpsWhen,
    10,
    incomingToggleTimer);
-   var clockDec = $Util.whenPressed($Keyboard.isDown(189));
-   var clockAcc = $Util.whenPressed($Keyboard.isDown(187));
    var trigger = function (_v0) {
       return function () {
-         return _U.cmp(_v0.threshold,
-         _v0.count) < 1 ? $Maybe.Just({ctor: "_Tuple0"}) : $Maybe.Nothing;
+         return _v0.clockTriggered ? _U.cmp(_v0.threshold,
+         _v0.count) < 1 ? $Maybe.Just({ctor: "_Tuple0"}) : $Maybe.Nothing : $Maybe.Nothing;
       }();
    };
    var init = {_: {}
+              ,clockTriggered: false
               ,count: 0
               ,threshold: 4};
    var $ = {ctor: "_Tuple2"
@@ -11052,32 +11054,42 @@ Elm.Timer.make = function (_elm) {
    thres_lower = $._0,
    thres_upper = $._1;
    var update = F2(function (update,
-   model) {
+   mdl) {
       return function () {
-         switch (update.ctor)
-         {case "Acc":
-            return _U.cmp(model.threshold,
-              thres_lower) > 0 ? _U.replace([["threshold"
-                                             ,model.threshold - 2]],
-              model) : model;
-            case "Clock":
-            return _U.cmp(model.count,
-              model.threshold) > -1 ? _U.replace([["count"
-                                                  ,0]],
-              model) : _U.replace([["count"
-                                   ,model.count + 1]],
-              model);
-            case "Dec":
-            return _U.cmp(model.threshold,
-              thres_upper) < 0 ? _U.replace([["threshold"
-                                             ,model.threshold + 2]],
-              model) : model;}
-         _U.badCase($moduleName,
-         "between lines 48 and 57");
+         var model = _U.replace([["clockTriggered"
+                                 ,false]],
+         mdl);
+         return function () {
+            switch (update.ctor)
+            {case "Acc":
+               return _U.cmp(model.threshold,
+                 thres_lower) > 0 ? _U.replace([["threshold"
+                                                ,model.threshold - 2]],
+                 model) : model;
+               case "Clock":
+               return _U.cmp(model.count,
+                 model.threshold) > -1 ? _U.replace([["count"
+                                                     ,0]
+                                                    ,["clockTriggered",true]],
+                 model) : _U.replace([["count"
+                                      ,model.count + 1]
+                                     ,["clockTriggered",true]],
+                 model);
+               case "Dec":
+               return _U.cmp(model.threshold,
+                 thres_upper) < 0 ? _U.replace([["threshold"
+                                                ,model.threshold + 2]],
+                 model) : model;}
+            _U.badCase($moduleName,
+            "between lines 53 and 62");
+         }();
       }();
    });
-   var Model = F2(function (a,b) {
+   var Model = F3(function (a,
+   b,
+   c) {
       return {_: {}
+             ,clockTriggered: c
              ,count: b
              ,threshold: a};
    });
@@ -11091,7 +11103,7 @@ Elm.Timer.make = function (_elm) {
                                                              {case "_Tuple0":
                                                                 return Acc;}
                                                              _U.badCase($moduleName,
-                                                             "on line 61, column 30 to 33");
+                                                             "on line 66, column 30 to 33");
                                                           }();
                                                        },
                                                        clockAcc)
@@ -11102,7 +11114,7 @@ Elm.Timer.make = function (_elm) {
                                                              {case "_Tuple0":
                                                                 return Dec;}
                                                              _U.badCase($moduleName,
-                                                             "on line 62, column 30 to 33");
+                                                             "on line 67, column 30 to 33");
                                                           }();
                                                        },
                                                        clockDec)
@@ -11112,7 +11124,14 @@ Elm.Timer.make = function (_elm) {
                                                              return Clock;
                                                           }();
                                                        },
-                                                       clock)]));
+                                                       clock)
+                                                       ,A2($Signal._op["<~"],
+                                                       function (_v9) {
+                                                          return function () {
+                                                             return Clock;
+                                                          }();
+                                                       },
+                                                       manualClock)]));
    var rawTimer = A3($Signal.foldp,
    update,
    init,

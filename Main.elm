@@ -38,11 +38,9 @@ updated =
   Signal.merge ((\() -> Clock) <~ Timer.timeUp)
                (UserInput <~ Input.updated)
                
-
 view : Model -> Element
 view (GlobalState inputM gameM) =
   Game.view gameM
-
 
 -- todo: add filter for this signal(necessary?)
 state : Signal Model
@@ -56,6 +54,4 @@ layoutMany_live (head::tail) =
 layout : Element -> Element -> Element
 layout e1 e2 =
   GElem.flow GElem.right [e1, e2]
-
--- debug
 

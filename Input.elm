@@ -96,17 +96,3 @@ hovering : Signal Game.CellCoord
 hovering =
   Signal.dropRepeats <| filterIllegalMousePos mousePosCalibed
 
--- old
-
-
---incomingMouseClick_calibed : Signal (Int, Int)
---incomingMouseClick_calibed =
---  (\(x, y) -> (x - mouse_calib_x, mouse_calib_y - y)) <~ incomingMouseClick
-
---cellClick_live : Signal Game.CellCoord
---cellClick_live =
---  Signal.filterMap Game.pixelToCellCoord (Game.CellCoord (0, 0)) incomingMouseClick_calibed
-
---mouseInfo_live : Signal Element
---mouseInfo_live =
---  GElem.show <~ Mouse.position
