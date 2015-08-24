@@ -35,14 +35,13 @@ update update (GlobalState inputM gameM) =
 
 updated : Signal Update
 updated =
-  Signal.merge ((\() -> Clock) <~ Timer.timeUp)
+  Signal.merge (always Clock <~ Timer.timeUp)
                (UserInput <~ Input.updated)
                
 view : Model -> Element
 view (GlobalState inputM gameM) =
   Game.view gameM
 
--- todo: add filter for this signal(necessary?)
 state : Signal Model
 state =
   Signal.foldp update (GlobalState Input.init Game.init) updated

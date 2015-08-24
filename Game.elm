@@ -1,4 +1,5 @@
-module Game (init, view, update, pixelToCellCoord, Model, 
+module Game (init, view, update, 
+  pixelToCellCoord, Model, 
   Update (Metabolism, Evolve), 
   Metabolism (Mitosis, Apoptosis, CircleOfLife), 
   CellCoord (CellCoord),
@@ -82,7 +83,7 @@ calibrate offset forms =
 
 draw : Model -> List Form
 draw model = 
-  List.map2 (\f c -> f c)
+  List.map2 (<|)
             (List.concat arrangementFuncs)
             (List.concat <| drawCells model)
 

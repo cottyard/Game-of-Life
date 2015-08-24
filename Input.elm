@@ -60,7 +60,7 @@ updated =
     MouseDown <~ pressing,
     MouseUp <~ releasing,
     Hover <~ hovering,
-    (\() -> NextStep) <~ manualStep
+    always NextStep <~ manualStep
   ]
 
 manualStep : Signal ()
@@ -83,9 +83,13 @@ filterIllegalMousePos : Signal MousePos -> Signal Game.CellCoord
 filterIllegalMousePos =
   Signal.filterMap Game.pixelToCellCoord (Game.CellCoord (-1, -1))
 
+calibrateMousePosToCanvas : MousePos -> MousePos
+calibrateMousePosToCanvas (x, y) =
+  (x - mouse_calib_x, mouse_calib_y - y)
+
 mousePosCalibed : Signal MousePos
 mousePosCalibed =
-  (\(x, y) -> (x - mouse_calib_x, mouse_calib_y - y)) <~ Mouse.position
+  calibrateMousePosToCanvas <~ Mouse.position
 
 pressing : Signal Game.CellCoord
 pressing =

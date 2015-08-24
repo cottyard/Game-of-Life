@@ -3,16 +3,6 @@ module Matrix (Matrix, get, set, create, size, toArray, neighbours, indexedMap) 
 import Array exposing (Array)
 import Maybe exposing (andThen)
 
---import Graphics.Element exposing (Element, show)
---mapper : Matrix Int -> (Int, Int) -> Int -> Int
---mapper m coord elem =
---  List.foldl (+) 0 (neighbours m coord)
-
---main : Element
---main = 
---  let m = (create (3, 3) -1)
---  in show (indexedMap (mapper m) m)
-
 type Matrix a = Matrix (Array (Array a)) a
 
 create : (Int, Int) -> a -> Matrix a
