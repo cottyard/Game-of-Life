@@ -19,12 +19,20 @@ reverse model =
 
 size = 15
 
-draw : Model -> Form
-draw state = 
-  case state of
-    Alive -> empty |> filled Color.black 
-    Dead  -> empty |> outlined defaultLine
-
 empty : Shape
 empty = 
   square (toFloat size)
+
+cellFormAlive : Form
+cellFormAlive =
+  filled Color.black empty
+
+cellFormDead : Form
+cellFormDead =
+  outlined defaultLine empty
+
+draw : Model -> Form
+draw state = 
+  case state of
+    Alive -> cellFormAlive
+    Dead  -> cellFormDead
